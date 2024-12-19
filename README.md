@@ -10,4 +10,3 @@
 ![CodeQL](https://github.com/sixafter/graph/actions/workflows/codeql-analysis.yaml/badge.svg)
 
 A Go library for creating and manipulating graph data structures.
-
