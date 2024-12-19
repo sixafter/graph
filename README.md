@@ -11,4 +11,3 @@
 
 A Go library for creating and manipulating graph data structures.
 
-
