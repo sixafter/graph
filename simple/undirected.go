@@ -266,7 +266,7 @@ func (u *undirected[K, T]) SetEdgeWithOptions(source, target K, options ...graph
 	}
 
 	for _, option := range options {
-		ep := existingEdge.Properties().Clone()
+		ep := existingEdge.Properties()
 		p, ok := ep.(*EdgeProperties) // Attempt to assert the type
 		if !ok {
 			return fmt.Errorf("failed to modify edge: %T", ep)

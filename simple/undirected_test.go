@@ -279,5 +279,20 @@ func TestUndirected_SetVertexWithOptions(t *testing.T) {
 
 	is.Equal(float64(10), vertex.Properties().Weight(), "Vertex weight should be updated")
 	is.Equal("UpdatedVertexA", vertex.Properties().Items()["label"], "Vertex label should be updated")
+}
 
+func TestUndirected_SetEdgeWithOptions(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	g, _ := New[string, string](graph.StringHash)
+	is.NoError(g.AddVertexWithOptions("A"))
+	is.NoError(g.AddVertexWithOptions("B"))
+	is.NoError(g.AddEdgeWithOptions("A", "B", EdgeWeight(5)))
+
+	is.NoError(g.SetEdgeWithOptions("A", "B", EdgeWeight(10)))
+	edge, err := g.Edge("A", "B")
+	is.NoError(err)
+
+	is.Equal(float64(10), edge.Properties().Weight(), "Edge weight should be updated")
 }
