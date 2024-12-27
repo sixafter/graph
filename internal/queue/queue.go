@@ -22,8 +22,42 @@ var (
 	ErrPriorityQueueEmpty = errors.New("priority queue is empty")
 )
 
-// PriorityQueue implements a minimum priority queue using a binary heap
-// that prioritizes smaller values over larger values.
+// PriorityQueue is a generic data structure that provides an efficient way to
+// manage elements with associated priorities. It implements a minimum priority
+// queue, where elements with smaller priority values are dequeued before elements
+// with larger priority values.
+//
+// Internally, the PriorityQueue uses a binary heap to maintain the heap property,
+// ensuring that the smallest-priority element is always at the front. The queue
+// supports dynamic updates to element priorities and efficient insertion and
+// removal operations.
+//
+// Type Parameters:
+//
+//	T - The type of the elements in the queue. It must be comparable.
+//
+// Key Features:
+//   - Fast insertion of new elements (O(log n)).
+//   - Efficient removal of the smallest-priority element (O(log n)).
+//   - Priority updates in logarithmic time (O(log n)).
+//   - Constant-time element existence checks via an internal cache.
+//
+// Use Cases:
+//   - Task scheduling based on priority.
+//   - Pathfinding algorithms (e.g., Dijkstra’s or A*).
+//   - Event simulation systems.
+//
+// Example Usage:
+//
+//	pq := NewPriorityQueue[string]()
+//	pq.Push("task1", 2.0)
+//	pq.Push("task2", 1.0)
+//	task, err := pq.Pop()
+//	if err != nil {
+//	    fmt.Println(err)
+//	} else {
+//	    fmt.Println(task) // Output: task2
+//	}
 type PriorityQueue[T comparable] struct {
 	items *minHeap[T]
 	cache map[T]*PriorityItem[T]

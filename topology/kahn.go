@@ -70,9 +70,9 @@ func TopologicalSort[K graph.Ordered, T any](g graph.Interface[K, T]) ([]K, erro
 
 		order = append(order, currentVertex)
 
-		edgeMap := adjacencyMap[currentVertex]
+		edges := adjacencyMap[currentVertex]
 
-		for target := range edgeMap {
+		for target := range edges {
 			predecessors := predecessorMap[target]
 			delete(predecessors, currentVertex)
 
@@ -90,26 +90,49 @@ func TopologicalSort[K graph.Ordered, T any](g graph.Interface[K, T]) ([]K, erro
 	return order, nil
 }
 
-// TopologicalSortDeterministic computes a deterministic topological ordering of the vertices in a
-// Directed Acyclic Interface (DAG) using Kahn's algorithm. A custom comparison function `less` is
-// used to deterministically decide when multiple valid orders exist.
+// TopologicalSortDeterministic performs a deterministic topological sort on a directed graph.
+// The function ensures that the resulting order is consistent across executions by applying
+// a custom comparison function (`less`) to resolve ties between vertices.
 //
 // Parameters:
-//   - g: A DirectedGraph acyclic graph represented as a [Interface[K, T]].
-//   - less: A comparison function to impose an ordering on vertices with equal precedence.
+//   - g: A graph implementing the `graph.Interface[K, T]`, representing the directed graph to sort.
+//   - less: A comparison function that determines the ordering of vertices with the same topological rank.
 //
 // Returns:
-//   - A slice of vertex hashes (of type K) in deterministic topological order.
-//   - An error if the graph is Undirected, Contains cycles, or encounters other failures.
+//   - A slice of vertices (`[]K`) in topological order.
+//   - An error if the graph is not directed or contains cycles.
 //
 // Errors:
-//   - [ErrUndirectedGraph] if the graph is not DirectedGraph.
-//   - [ErrCyclicGraph] if the graph Contains cycles.
-//   - [ErrFailedToGetGraphOrder], [ErrFailedToGetAdjacencyMap], or [ErrFailedToGetPredecessorMap] for failures
-//     in retrieving the graph's properties.
+//   - Returns `graph.ErrUndirectedGraph` if the graph is undirected.
+//   - Returns `graph.ErrCyclicGraph` if the graph contains a cycle.
+//   - Returns `graph.ErrFailedToGetGraphOrder` or `graph.ErrFailedToGetAdjacencyMap` if there is an issue retrieving graph properties.
 //
-// Complexity: O((V + E) log V), where V is the number of vertices and E is the number of edges.
-// The additional log V factor arises from sorting the queue of vertices with zero in-degree.
+// Key Details:
+//   - The function starts by identifying all vertices with no predecessors and adding them to a processing queue (`q`).
+//   - During each iteration, the next vertex is dequeued, added to the result, and its successors are checked.
+//   - The `frontier` variable holds the successors of the current vertex that are ready for processing (i.e., all their predecessors have been processed).
+//   - The `frontier` is sorted using the `less` function before being added to the processing queue to ensure deterministic ordering.
+//
+// Time Complexity:
+//   - O(V + E) for traversing the graph, where V is the number of vertices and E is the number of edges.
+//   - Additional cost for sorting the `frontier` in each iteration, which depends on the graph structure and the `less` function.
+//
+// Example Usage:
+//
+//	g := NewDirectedGraph[int, any]()
+//	g.AddEdge(1, 2)
+//	g.AddEdge(2, 3)
+//	order, err := TopologicalSortDeterministic(g, func(a, b int) bool { return a < b })
+//	if err != nil {
+//	    fmt.Println(err)
+//	} else {
+//	    fmt.Println(order) // Output: [1, 2, 3]
+//
+// Frontier Explanation:
+//   - The `frontier` holds the set of vertices that are ready to be processed next. A vertex is added to the
+//     `frontier` only when all its predecessors have been processed and added to the result.
+//   - Sorting the `frontier` ensures a consistent and deterministic order of processing, even when the graph
+//     has multiple valid topological orderings.
 func TopologicalSortDeterministic[K graph.Ordered, T any](g graph.Interface[K, T], less func(K, K) bool) ([]K, error) {
 	if !g.Traits().IsDirected {
 		return nil, graph.ErrUndirectedGraph
@@ -151,12 +174,10 @@ func TopologicalSortDeterministic[K graph.Ordered, T any](g graph.Interface[K, T
 		q = q[1:]
 
 		order = append(order, currentVertex)
-
 		frontier := make([]K, 0)
+		edges := adjacencyMap[currentVertex]
 
-		edgeMap := adjacencyMap[currentVertex]
-
-		for target := range edgeMap {
+		for target := range edges {
 			predecessors := predecessorMap[target]
 			delete(predecessors, currentVertex)
 

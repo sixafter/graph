@@ -217,35 +217,57 @@ func (u *UnionFind[K]) Union(vertex1, vertex2 K) {
 	u.parents[root2] = root1
 }
 
-// Find retrieves the representative (root) of the set containing the given vertex.
-// The function uses path compression to optimize future `Find` operations by
-// flattening the structure.
+// Find locates the root (representative) of the set containing the given vertex.
+// It also applies path compression to optimize the structure of the Union-Find
+// data structure for future Find calls.
+//
+// The function operates in two phases:
+//  1. Traverse the tree to find the root of the set containing the vertex. The
+//     root is identified as the element that is its own parent in the `parents` map.
+//  2. Perform path compression, flattening the tree by making every node on the
+//     path from the vertex to the root point directly to the root. This reduces
+//     the depth of the tree and ensures that future Find operations for these
+//     nodes are faster.
+//
+// Time Complexity:
+//   - Without path compression, the worst-case time complexity of Find is O(n)
+//     for a deeply nested tree.
+//   - With path compression, the amortized time complexity is O(α(n)), where
+//     α(n) is the inverse Ackermann function, which grows extremely slowly and
+//     is effectively constant for all practical inputs.
 //
 // Parameters:
-//   - vertex: The vertex whose set representative is to be found.
+//   - vertex: The element whose set representative (root) is to be found.
 //
 // Returns:
-//   - The root of the set containing the vertex.
+//   - The root of the set containing the given vertex.
 //
-// Complexity: O(α(V)), where α is the inverse Ackermann function, effectively constant.
+// Example Usage:
 //
-// Example:
+//	uf := NewUnionFind[int]()
+//	uf.Union(1, 2)
+//	uf.Union(2, 3)
+//	fmt.Println(uf.Find(1)) // Output: 3 (assuming 3 becomes the root)
+//	fmt.Println(uf.Find(2)) // Output: 3 (optimized due to path compression)
 //
-//	root := uf.Find(1)
-//	fmt.Println(root)
+// Path Compression Explanation:
+//
+//	During the traversal, each node encountered in the path from the given vertex
+//	to the root is updated to point directly to the root. This reduces the depth
+//	of the tree, allowing subsequent Find operations to complete in nearly
+//	constant time.
 func (u *UnionFind[K]) Find(vertex K) K {
+	// Phase 1: Traverse upward to find the root of the set.
 	root := vertex
-
 	for u.parents[root] != root {
 		root = u.parents[root]
 	}
 
-	// Perform a path compression in order to optimize of future Find calls.
+	// Phase 2: Perform path compression to flatten the tree structure.
 	current := vertex
-
 	for u.parents[current] != root {
-		parent := u.parents[vertex]
-		u.parents[vertex] = root
+		parent := u.parents[current]
+		u.parents[current] = root // Update the parent to point directly to the root.
 		current = parent
 	}
 

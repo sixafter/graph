@@ -12,66 +12,67 @@ import (
 	"github.com/sixafter/graph/internal/queue"
 )
 
-// DFS performs a depth-first search on the graph, starting from the given vertex. The visit
-// function will be invoked with the hash of the vertex currently visited. If it returns false, DFS
-// will continue traversing the graph, and if it returns true, the traversal will be stopped. In
-// case the graph is disconnected, only the vertices joined with the starting vertex are visited.
+// DFS performs a depth-first traversal on the given graph, starting from the specified vertex.
+// The traversal visits each vertex and calls the provided `visit` function. If `visit` returns
+// true, the traversal stops early.
 //
-// This example prints all vertices of the graph in DFS-order:
+// Parameters:
+// - g: The graph to traverse.
+// - start: The starting vertex for the traversal.
+// - visit: A callback function invoked for each visited vertex. If it returns true, the traversal stops.
 //
-//	g := graph.New(graph.IntHash)
+// Returns:
+// - An error if the adjacency map cannot be retrieved or if the starting vertex is not found.
 //
-//	_ = g.AddVertex(1)
-//	_ = g.AddVertex(2)
-//	_ = g.AddVertex(3)
-//
-//	_ = g.AddEdge(1, 2)
-//	_ = g.AddEdge(2, 3)
-//	_ = g.AddEdge(3, 1)
-//
-//	_ = graph.DFS(g, 1, func(value int) bool {
-//		fmt.Println(value)
-//		return false
-//	})
-//
-// Similarly, if you have a graph of City vertices and the traversal should stop at London, the
-// visit function would look as follows:
-//
-//	func(c City) bool {
-//		return c.Name == "London"
-//	}
+// Complexity: O(V + E), where V is the number of vertices and E is the number of edges.
 //
 // DFS is non-recursive and maintains a Stack instead.
 func DFS[K graph.Ordered, T any](g graph.Interface[K, T], start K, visit func(K) bool) error {
+	// Retrieve the adjacency map for the graph, which provides edges for each vertex.
 	adjacencyMap, err := g.AdjacencyMap()
 	if err != nil {
 		return fmt.Errorf("could not get adjacency map: %w", err)
 	}
 
+	// Ensure that the starting vertex exists in the graph.
 	if _, ok := adjacencyMap[start]; !ok {
 		return fmt.Errorf("could not find start vertex with hash %v", start)
 	}
 
+	// Initialize a stack to simulate the recursion used in traditional DFS.
+	// The stack contains vertices to be processed.
 	stack := queue.NewStack[K]()
+
+	// A map to track which vertices have already been visited.
 	visited := make(map[K]bool)
 
+	// Push the starting vertex onto the stack to begin the traversal.
 	stack.Push(start)
 
+	// Continue the traversal until the stack is empty.
 	for !stack.IsEmpty() {
-		currentHash, _ := stack.Pop()
+		// Pop the top vertex from the stack to process it.
+		current, _ := stack.Pop()
 
-		if _, ok := visited[currentHash]; !ok {
-			// Stop traversing the graph if the visit function returns true.
-			if stop := visit(currentHash); stop {
+		// If the vertex has not been visited, process it.
+		if _, ok := visited[current]; !ok {
+			// Call the visit function for the current vertex.
+			// If the function returns true, stop the traversal.
+			if stop := visit(current); stop {
 				break
 			}
-			visited[currentHash] = true
 
-			for adjacency := range adjacencyMap[currentHash] {
+			// Mark the vertex as visited to prevent re-processing.
+			visited[current] = true
+
+			// Push all adjacent vertices of the current vertex onto the stack.
+			// These vertices will be processed later.
+			for adjacency := range adjacencyMap[current] {
 				stack.Push(adjacency)
 			}
 		}
 	}
 
+	// Return nil to indicate that the traversal completed successfully.
 	return nil
 }

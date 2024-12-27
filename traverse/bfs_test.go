@@ -48,7 +48,7 @@ func TestBFS(t *testing.T) {
 	is.Equal(len(expectedVertices), len(visited), "Unexpected number of visited vertices")
 }
 
-func TestBFSWithDepth(t *testing.T) {
+func TestBFSWithDepthTracking(t *testing.T) {
 	t.Parallel()
 	is := assert.New(t)
 
@@ -77,7 +77,7 @@ func TestBFSWithDepth(t *testing.T) {
 
 	// Capture visited vertices with depth
 	visited := make(map[int]int)
-	err := BFSWithDepth(g, 1, func(vertex, depth int) bool {
+	err := BFSWithDepthTracking(g, 1, func(vertex, depth int) bool {
 		visited[vertex] = depth
 		return false // Continue traversal
 	})

@@ -52,12 +52,12 @@ func TransitiveReduction[K graph.Ordered, T any](g graph.Interface[K, T]) (graph
 		return nil, graph.ErrUndirectedGraph
 	}
 
-	reducedGraph, err := g.Clone()
+	reduced, err := g.Clone()
 	if err != nil {
 		return nil, fmt.Errorf("%w: %v", graph.ErrFailedToCloneGraph, err)
 	}
 
-	adjacencyMap, err := reducedGraph.AdjacencyMap()
+	adjacencyMap, err := reduced.AdjacencyMap()
 	if err != nil {
 		return nil, fmt.Errorf("%w: %v", graph.ErrFailedToGetAdjacencyMap, err)
 	}
@@ -87,14 +87,14 @@ func TransitiveReduction[K graph.Ordered, T any](g graph.Interface[K, T]) (graph
 	// - If a cycle is detected during the DFS, return an error indicating that transitive
 	//   reduction cannot be performed on graphs with cycles.
 	for vertex, successors := range adjacencyMap {
-		tOrder, err := reducedGraph.Order()
+		order, err := reduced.Order()
 		if err != nil {
 			return nil, fmt.Errorf("%w: %v", graph.ErrFailedToGetGraphOrder, err)
 		}
 
 		for successor := range successors {
 			s := queue.NewStack[K]()
-			visited := make(map[K]struct{}, tOrder)
+			visited := make(map[K]struct{}, order)
 
 			s.Push(successor)
 
@@ -119,7 +119,7 @@ func TransitiveReduction[K graph.Ordered, T any](g graph.Interface[K, T]) (graph
 					}
 
 					if _, ok := adjacencyMap[vertex][adjacency]; ok {
-						_ = reducedGraph.RemoveEdge(vertex, adjacency)
+						_ = reduced.RemoveEdge(vertex, adjacency)
 					}
 					s.Push(adjacency)
 				}
@@ -127,5 +127,5 @@ func TransitiveReduction[K graph.Ordered, T any](g graph.Interface[K, T]) (graph
 		}
 	}
 
-	return reducedGraph, nil
+	return reduced, nil
 }

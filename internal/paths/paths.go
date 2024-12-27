@@ -55,16 +55,16 @@ func WouldCreateCycle[K graph.Ordered, T any](g graph.Interface[K, T], source, t
 	s.Push(source)
 
 	for !s.IsEmpty() {
-		currentHash, _ := s.Pop()
+		current, _ := s.Pop()
 
-		if _, ok := visited[currentHash]; !ok {
-			if currentHash == target {
+		if _, ok := visited[current]; !ok {
+			if current == target {
 				return true, nil
 			}
 
-			visited[currentHash] = true
+			visited[current] = true
 
-			for adjacency := range predecessors[currentHash] {
+			for adjacency := range predecessors[current] {
 				s.Push(adjacency)
 			}
 		}

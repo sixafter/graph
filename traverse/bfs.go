@@ -45,10 +45,10 @@ func BFS[K graph.Ordered, T any](g graph.Interface[K, T], start K, visit func(K)
 	ignoreDepth := func(vertex K, _ int) bool {
 		return visit(vertex)
 	}
-	return BFSWithDepth(g, start, ignoreDepth)
+	return BFSWithDepthTracking(g, start, ignoreDepth)
 }
 
-// BFSWithDepth performs a breadth-first search (BFS) on the graph, starting from the given vertex.
+// BFSWithDepthTracking performs a breadth-first search (BFS) on the graph, starting from the given vertex.
 // The `visit` function is invoked for each vertex visited, and the current depth is passed as the
 // second argument. The traversal continues unless the `visit` function returns `true`, in which case
 // the traversal stops early.
@@ -60,7 +60,7 @@ func BFS[K graph.Ordered, T any](g graph.Interface[K, T], start K, visit func(K)
 //
 // Example usage:
 //
-//	_ = graph.BFSWithDepth(g, 1, func(value int, depth int) bool {
+//	_ = graph.BFSWithDepthTracking(g, 1, func(value int, depth int) bool {
 //	    fmt.Printf("Visited vertex: %d at depth: %d\n", value, depth)
 //	    return depth > 3 // Stop traversal if depth exceeds 3
 //	})
@@ -70,42 +70,53 @@ func BFS[K graph.Ordered, T any](g graph.Interface[K, T], start K, visit func(K)
 // - Returns an error if the start vertex is not found in the graph.
 //
 // Complexity: O(V + E), where V is the number of vertices and E is the number of edges.
-func BFSWithDepth[K graph.Ordered, T any](g graph.Interface[K, T], start K, visit func(K, int) bool) error {
+func BFSWithDepthTracking[K graph.Ordered, T any](g graph.Interface[K, T], start K, visit func(K, int) bool) error {
+	// Retrieve the adjacency map of the graph.
 	adjacencyMap, err := g.AdjacencyMap()
 	if err != nil {
 		return fmt.Errorf("could not get adjacency map: %w", err)
 	}
 
+	// Ensure the starting vertex exists in the graph.
 	if _, ok := adjacencyMap[start]; !ok {
 		return fmt.Errorf("could not find start vertex with hash %v", start)
 	}
 
-	// Define a queue node with vertex and depth
+	// Define a helper type for the BFS queue, which stores the vertex and its depth.
 	type queueNode struct {
-		vertex K
-		depth  int
+		vertex K   // The current vertex.
+		depth  int // The depth of the vertex from the starting point.
 	}
 
+	// Initialize the queue with the starting vertex at depth 1.
 	q := []queueNode{{vertex: start, depth: 1}}
+
+	// Create a map to track visited vertices, starting with the initial vertex.
 	visited := make(map[K]bool)
 	visited[start] = true
 
+	// Process the queue until it is empty.
 	for len(q) > 0 {
+		// Dequeue the first element in the queue.
 		current := q[0]
 		q = q[1:]
 
-		// Visit the current vertex
+		// Call the visit function for the current vertex. If it returns true, stop traversal.
 		if stop := visit(current.vertex, current.depth); stop {
 			return nil
 		}
 
+		// Iterate over all adjacent vertices of the current vertex.
 		for adjacency := range adjacencyMap[current.vertex] {
+			// If the adjacent vertex has not been visited, mark it as visited.
 			if !visited[adjacency] {
 				visited[adjacency] = true
+				// Add the adjacent vertex to the queue with an incremented depth.
 				q = append(q, queueNode{vertex: adjacency, depth: current.depth + 1})
 			}
 		}
 	}
 
+	// Return nil to indicate that the traversal completed successfully.
 	return nil
 }

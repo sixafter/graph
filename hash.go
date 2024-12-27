@@ -37,3 +37,33 @@ func StringHash(v string) string {
 func IntHash(v int) int {
 	return v
 }
+
+// Float64Hash returns the given float as its hash.
+//
+// This is a simple identity function that is useful when the float itself
+// uniquely identifies the vertex in the graph.
+//
+// Example:
+//
+//	g := simple.New(graph.Float64Hash, graph.Directed())
+//	g.AddVertex(1.0)
+//	g.AddVertex(2.0)
+//	g.AddEdge(1.0, 2.0)
+func Float64Hash(v float64) float64 {
+	return v
+}
+
+// Float32Hash returns the given float as its hash.
+//
+// This is a simple identity function that is useful when the float itself
+// uniquely identifies the vertex in the graph.
+//
+// Example:
+//
+//	g := simple.New(graph.Float32Hash, graph.Directed())
+//	g.AddVertex(1.0)
+//	g.AddVertex(2.0)
+//	g.AddEdge(1.0, 2.0)
+func Float32Hash(v float32) float32 {
+	return v
+}
