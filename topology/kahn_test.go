@@ -13,134 +13,107 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestTopologicalSort(t *testing.T) {
+func TestTopologicalSortValidDAG(t *testing.T) {
 	t.Parallel()
 	is := assert.New(t)
 
-	t.Run("Valid DAG", func(t *testing.T) {
-		t.Parallel()
-		g, _ := simple.New[int, int](graph.IntHash, graph.Directed(), graph.Acyclic())
+	g, _ := simple.New[int, int](graph.IntHash, graph.Directed(), graph.Acyclic())
 
-		// Add vertices first
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 should not fail")
-		err = g.AddVertexWithOptions(3)
-		is.NoError(err, "Adding vertex 3 should not fail")
+	// Add vertices
+	is.NoError(g.AddVertexWithOptions(1))
+	is.NoError(g.AddVertexWithOptions(2))
+	is.NoError(g.AddVertexWithOptions(3))
 
-		// Add edges
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge 1->2 should not fail")
-		err = g.AddEdgeWithOptions(2, 3)
-		is.NoError(err, "Adding edge 2->3 should not fail")
+	// Add edges
+	is.NoError(g.AddEdgeWithOptions(1, 2))
+	is.NoError(g.AddEdgeWithOptions(2, 3))
 
-		order, err := TopologicalSort(g)
-		is.NoError(err)
-		is.Equal([]int{1, 2, 3}, order, "Order should be topological")
-	})
-
-	t.Run("Interface with Cycles", func(t *testing.T) {
-		t.Parallel()
-		g, _ := simple.New(graph.IntHash, graph.Directed())
-
-		// Add vertices first
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 should not fail")
-		err = g.AddVertexWithOptions(3)
-		is.NoError(err, "Adding vertex 3 should not fail")
-
-		// Add edges to form a cycle
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge 1->2 should not fail")
-		err = g.AddEdgeWithOptions(2, 3)
-		is.NoError(err, "Adding edge 2->3 should not fail")
-		err = g.AddEdgeWithOptions(3, 1)
-		is.NoError(err, "Adding edge 3->1 should not fail")
-
-		_, err = TopologicalSort(g)
-		is.ErrorIs(err, graph.ErrCyclicGraph, "Should return ErrCyclicGraph for graphs with cycles")
-	})
-
-	t.Run("undirected Interface", func(t *testing.T) {
-		t.Parallel()
-		g, _ := simple.New(graph.IntHash)
-
-		// Add vertices
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 should not fail")
-
-		// Add edge
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge 1->2 should not fail")
-
-		_, err = TopologicalSort(g)
-		is.ErrorIs(err, graph.ErrUndirectedGraph, "Should return ErrUndirectedGraph for undirected graphs")
-	})
+	order, err := TopologicalSort(g)
+	is.NoError(err)
+	is.Equal([]int{1, 2, 3}, order, "Order should be topological")
 }
 
-func TestTopologicalSortDeterministic(t *testing.T) {
+func TestTopologicalSortGraphWithCycles(t *testing.T) {
 	t.Parallel()
 	is := assert.New(t)
 
-	t.Run("Valid DAG with Deterministic Order", func(t *testing.T) {
-		t.Parallel()
-		g, _ := simple.New(graph.IntHash, graph.Directed(), graph.Acyclic())
+	g, _ := simple.New(graph.IntHash, graph.Directed())
 
-		// Add vertices first
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 should not fail")
-		err = g.AddVertexWithOptions(3)
-		is.NoError(err, "Adding vertex 3 should not fail")
+	// Add vertices
+	is.NoError(g.AddVertexWithOptions(1))
+	is.NoError(g.AddVertexWithOptions(2))
+	is.NoError(g.AddVertexWithOptions(3))
 
-		// Add edges
-		err = g.AddEdgeWithOptions(1, 3)
-		is.NoError(err, "Adding edge 1->3 should not fail")
-		err = g.AddEdgeWithOptions(2, 3)
-		is.NoError(err, "Adding edge 2->3 should not fail")
+	// Add edges to form a cycle
+	is.NoError(g.AddEdgeWithOptions(1, 2))
+	is.NoError(g.AddEdgeWithOptions(2, 3))
+	is.NoError(g.AddEdgeWithOptions(3, 1))
 
-		less := func(a, b int) bool {
-			return a < b
-		}
+	_, err := TopologicalSort(g)
+	is.ErrorIs(err, graph.ErrCyclicGraph, "Should return ErrCyclicGraph for graphs with cycles")
+}
 
-		order, err := TopologicalSortDeterministic(g, less)
-		is.NoError(err)
-		// Possible valid orders: [1,2,3] or [2,1,3]
-		// With the 'less' function, [1,2,3] should be returned
-		is.Equal([]int{1, 2, 3}, order, "Order should be deterministic")
-	})
+func TestTopologicalSortUndirectedGraph(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-	t.Run("Interface with Cycles", func(t *testing.T) {
-		t.Parallel()
-		g, _ := simple.New(graph.IntHash, graph.Directed())
+	g, _ := simple.New(graph.IntHash)
 
-		// Add vertices first
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 should not fail")
-		err = g.AddVertexWithOptions(3)
-		is.NoError(err, "Adding vertex 3 should not fail")
+	// Add vertices
+	is.NoError(g.AddVertexWithOptions(1))
+	is.NoError(g.AddVertexWithOptions(2))
 
-		// Add edges to form a cycle
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge 1->2 should not fail")
-		err = g.AddEdgeWithOptions(2, 3)
-		is.NoError(err, "Adding edge 2->3 should not fail")
-		err = g.AddEdgeWithOptions(3, 1)
-		is.NoError(err, "Adding edge 3->1 should not fail")
+	// Add edge
+	is.NoError(g.AddEdgeWithOptions(1, 2))
 
-		less := func(a, b int) bool {
-			return a < b
-		}
+	_, err := TopologicalSort(g)
+	is.ErrorIs(err, graph.ErrUndirectedGraph, "Should return ErrUndirectedGraph for undirected graphs")
+}
 
-		_, err = TopologicalSortDeterministic(g, less)
-		is.ErrorIs(err, graph.ErrCyclicGraph, "Should return ErrCyclicGraph for graphs with cycles")
-	})
+func TestTopologicalSortDeterministicValidDAG(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	g, _ := simple.New(graph.IntHash, graph.Directed(), graph.Acyclic())
+
+	// Add vertices
+	is.NoError(g.AddVertexWithOptions(1))
+	is.NoError(g.AddVertexWithOptions(2))
+	is.NoError(g.AddVertexWithOptions(3))
+
+	// Add edges
+	is.NoError(g.AddEdgeWithOptions(1, 3))
+	is.NoError(g.AddEdgeWithOptions(2, 3))
+
+	less := func(a, b int) bool {
+		return a < b
+	}
+
+	order, err := TopologicalSortDeterministic(g, less)
+	is.NoError(err)
+	is.Equal([]int{1, 2, 3}, order, "Order should be deterministic")
+}
+
+func TestTopologicalSortDeterministicGraphWithCycles(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	g, _ := simple.New(graph.IntHash, graph.Directed())
+
+	// Add vertices
+	is.NoError(g.AddVertexWithOptions(1))
+	is.NoError(g.AddVertexWithOptions(2))
+	is.NoError(g.AddVertexWithOptions(3))
+
+	// Add edges to form a cycle
+	is.NoError(g.AddEdgeWithOptions(1, 2))
+	is.NoError(g.AddEdgeWithOptions(2, 3))
+	is.NoError(g.AddEdgeWithOptions(3, 1))
+
+	less := func(a, b int) bool {
+		return a < b
+	}
+
+	_, err := TopologicalSortDeterministic(g, less)
+	is.ErrorIs(err, graph.ErrCyclicGraph, "Should return ErrCyclicGraph for graphs with cycles")
 }

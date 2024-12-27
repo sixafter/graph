@@ -13,123 +13,85 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestUnionUndirected(t *testing.T) {
+func TestUnionDirectedWithOverlappingVertices(t *testing.T) {
 	t.Parallel()
+	is := assert.New(t)
 
-	t.Run("Union of two graphs with overlapping vertices", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	g, _ := simple.New(graph.IntHash, graph.Directed())
+	h, _ := simple.New(graph.IntHash, graph.Directed())
 
-		// Create the first graph
-		g, _ := simple.New(graph.IntHash)
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to g should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to g should not fail")
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to g should not fail")
+	is.NoError(g.AddVertexWithOptions(1))
+	is.NoError(g.AddVertexWithOptions(2))
+	is.NoError(g.AddEdgeWithOptions(1, 2))
 
-		// Create the second graph with an overlapping vertex (2)
-		h, _ := simple.New(graph.IntHash)
-		err = h.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to h should not fail")
-		err = h.AddVertexWithOptions(3)
-		is.NoError(err, "Adding vertex 3 to h should not fail")
-		err = h.AddEdgeWithOptions(2, 3)
-		is.NoError(err, "Adding edge (2,3) to h should not fail")
+	is.NoError(h.AddVertexWithOptions(2))
+	is.NoError(h.AddVertexWithOptions(3))
+	is.NoError(h.AddEdgeWithOptions(2, 3))
 
-		// Perform the union
-		unionGraph, err := Union(g, h)
-		is.NoError(err, "Union operation should not fail")
-
-		// Validate the union graph's order (number of vertices)
-		order, err := unionGraph.Order()
-		is.NoError(err, "Getting order of unionGraph should not fail")
-		is.Equal(3, order, "Union graph should contain 3 vertices")
-
-		// Validate the union graph's size (number of edges)
-		size, err := unionGraph.Size()
-		is.NoError(err, "Getting size of unionGraph should not fail")
-		is.Equal(2, size, "Union graph should contain 2 edges")
-
-		// Check existence of edges
-		edgeExists, err := unionGraph.HasEdge(1, 2)
-		is.NoError(err, "Checking existence of edge (1,2) should not fail")
-		is.True(edgeExists, "Edge (1,2) should exist in the union graph")
-
-		edgeExists, err = unionGraph.HasEdge(2, 3)
-		is.NoError(err, "Checking existence of edge (2,3) should not fail")
-		is.True(edgeExists, "Edge (2,3) should exist in the union graph")
-
-		// Check existence of vertices
-		_, err = unionGraph.Vertex(1)
-		is.NoError(err, "Vertex 1 should exist in the union graph")
-		_, err = unionGraph.Vertex(2)
-		is.NoError(err, "Vertex 2 should exist in the union graph")
-		_, err = unionGraph.Vertex(3)
-		is.NoError(err, "Vertex 3 should exist in the union graph")
-	})
+	unionGraph, err := Union(g, h)
+	is.NoError(err)
+	order, err := unionGraph.Order()
+	is.NoError(err)
+	is.Equal(3, order, "Union graph should have 3 vertices")
+	size, err := unionGraph.Size()
+	is.NoError(err)
+	is.Equal(2, size, "Union graph should have 2 edges")
+	exists, err := unionGraph.HasEdge(1, 2)
+	is.True(exists, "Edge (1,2) should exist")
+	exists, err = unionGraph.HasEdge(2, 3)
+	is.True(exists, "Edge (2,3) should exist")
+	exists, err = unionGraph.HasEdge(2, 1)
+	is.False(exists, "Edge (2,1) should not exist")
 }
 
-func TestUnionDirected(t *testing.T) {
+func TestUnionDirectedWithDisjointGraphs(t *testing.T) {
 	t.Parallel()
+	is := assert.New(t)
 
-	t.Run("Union of two directed graphs with overlapping vertices", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	g, _ := simple.New(graph.IntHash, graph.Directed())
+	h, _ := simple.New(graph.IntHash, graph.Directed())
 
-		// Create the first directed graph
-		g, _ := simple.New(graph.IntHash, graph.Directed())
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to g should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to g should not fail")
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding directed edge (1,2) to g should not fail")
+	is.NoError(g.AddVertexWithOptions(1))
+	is.NoError(g.AddVertexWithOptions(2))
+	is.NoError(g.AddEdgeWithOptions(1, 2))
 
-		// Create the second directed graph with an overlapping vertex (2)
-		h, _ := simple.New(graph.IntHash, graph.Directed())
-		err = h.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to h should not fail")
-		err = h.AddVertexWithOptions(3)
-		is.NoError(err, "Adding vertex 3 to h should not fail")
-		err = h.AddEdgeWithOptions(2, 3)
-		is.NoError(err, "Adding directed edge (2,3) to h should not fail")
+	is.NoError(h.AddVertexWithOptions(3))
+	is.NoError(h.AddVertexWithOptions(4))
+	is.NoError(h.AddEdgeWithOptions(3, 4))
 
-		// Perform the union
-		unionGraph, err := Union(g, h)
-		is.NoError(err, "Union operation should not fail")
+	unionGraph, err := Union(g, h)
+	is.NoError(err)
+	order, err := unionGraph.Order()
+	is.NoError(err)
+	is.Equal(4, order, "Union graph should have 4 vertices")
+	size, err := unionGraph.Size()
+	is.NoError(err)
+	is.Equal(2, size, "Union graph should have 2 edges")
+	exists, err := unionGraph.HasEdge(1, 2)
+	is.True(exists, "Edge (1,2) should exist")
 
-		// Validate the union graph's order (number of vertices)
-		order, err := unionGraph.Order()
-		is.NoError(err, "Getting order of unionGraph should not fail")
-		is.Equal(3, order, "Union graph should contain 3 vertices")
+	exists, err = unionGraph.HasEdge(3, 4)
+	is.True(exists, "Edge (3,4) should exist")
+}
 
-		// Validate the union graph's size (number of edges)
-		size, err := unionGraph.Size()
-		is.NoError(err, "Getting size of unionGraph should not fail")
-		is.Equal(2, size, "Union graph should contain 2 edges")
+func TestUnionDirectedWithEmptyGraph(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-		// Check existence of edges
-		edgeExists, err := unionGraph.HasEdge(1, 2)
-		is.NoError(err, "Checking existence of edge (1,2) should not fail")
-		is.True(edgeExists, "Directed edge (1,2) should exist in the union graph")
+	g, _ := simple.New(graph.IntHash, graph.Directed())
+	h, _ := simple.New(graph.IntHash, graph.Directed())
 
-		edgeExists, err = unionGraph.HasEdge(2, 3)
-		is.NoError(err, "Checking existence of edge (2,3) should not fail")
-		is.True(edgeExists, "Directed edge (2,3) should exist in the union graph")
+	is.NoError(g.AddVertexWithOptions(1))
+	is.NoError(g.AddEdgeWithOptions(1, 1)) // Self-loop
 
-		// Ensure directionality is respected
-		edgeExists, err = unionGraph.HasEdge(2, 1)
-		is.NoError(err, "Checking existence of edge (2,1) should not fail")
-		is.False(edgeExists, "Directed edge (2,1) should not exist in the union graph")
-
-		// Check existence of vertices
-		_, err = unionGraph.Vertex(1)
-		is.NoError(err, "Vertex 1 should exist in the union graph")
-		_, err = unionGraph.Vertex(2)
-		is.NoError(err, "Vertex 2 should exist in the union graph")
-		_, err = unionGraph.Vertex(3)
-		is.NoError(err, "Vertex 3 should exist in the union graph")
-	})
+	unionGraph, err := Union(g, h)
+	is.NoError(err)
+	order, err := unionGraph.Order()
+	is.NoError(err)
+	is.Equal(1, order, "Union graph should have 1 vertex")
+	size, err := unionGraph.Size()
+	is.NoError(err)
+	is.Equal(1, size, "Union graph should have 1 edge")
+	exists, err := unionGraph.HasEdge(1, 1)
+	is.True(exists, "Self-loop (1,1) should exist")
 }

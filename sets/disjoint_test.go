@@ -13,118 +13,78 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestIsDisjoint(t *testing.T) {
+func TestIsDisjointUndirectedDisjointGraphs(t *testing.T) {
 	t.Parallel()
+	is := assert.New(t)
 
-	t.Run("Disjoint undirected Graphs", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	g, _ := simple.New(graph.IntHash) // undirected by default
+	is.NoError(g.AddVertexWithOptions(1))
+	is.NoError(g.AddVertexWithOptions(2))
+	is.NoError(g.AddEdgeWithOptions(1, 2))
 
-		// Create first undirected graph `g`
-		g, _ := simple.New(graph.IntHash) // undirected by default
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to g should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to g should not fail")
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to g should not fail")
+	h, _ := simple.New(graph.IntHash) // undirected by default
+	is.NoError(h.AddVertexWithOptions(3))
+	is.NoError(h.AddVertexWithOptions(4))
+	is.NoError(h.AddEdgeWithOptions(3, 4))
 
-		// Create second undirected graph `h`
-		h, _ := simple.New(graph.IntHash) // undirected by default
-		err = h.AddVertexWithOptions(3)
-		is.NoError(err, "Adding vertex 3 to h should not fail")
-		err = h.AddVertexWithOptions(4)
-		is.NoError(err, "Adding vertex 4 to h should not fail")
-		err = h.AddEdgeWithOptions(3, 4)
-		is.NoError(err, "Adding edge (3,4) to h should not fail")
+	disjoint, err := IsDisjoint(g, h)
+	is.NoError(err)
+	is.True(disjoint, "Graphs g and h should be disjoint")
+}
 
-		// Test if `g` and `h` are disjoint
-		disjoint, err := IsDisjoint(g, h)
-		is.NoError(err, "IsDisjoint should not return an error")
-		is.True(disjoint, "Graphs g and h should be disjoint")
-	})
+func TestIsDisjointUndirectedNonDisjointGraphs(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-	t.Run("Non-Disjoint undirected Graphs", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	g, _ := simple.New(graph.IntHash) // undirected by default
+	is.NoError(g.AddVertexWithOptions(1))
+	is.NoError(g.AddVertexWithOptions(2))
+	is.NoError(g.AddEdgeWithOptions(1, 2))
 
-		// Create first undirected graph `g`
-		g, _ := simple.New(graph.IntHash) // undirected by default
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to g should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to g should not fail")
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to g should not fail")
+	h, _ := simple.New(graph.IntHash) // undirected by default
+	is.NoError(h.AddVertexWithOptions(2))
+	is.NoError(h.AddVertexWithOptions(3))
+	is.NoError(h.AddEdgeWithOptions(2, 3))
 
-		// Create second undirected graph `h` with overlapping vertex
-		h, _ := simple.New(graph.IntHash) // undirected by default
-		err = h.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to h should not fail")
-		err = h.AddVertexWithOptions(3)
-		is.NoError(err, "Adding vertex 3 to h should not fail")
-		err = h.AddEdgeWithOptions(2, 3)
-		is.NoError(err, "Adding edge (2,3) to h should not fail")
+	disjoint, err := IsDisjoint(g, h)
+	is.NoError(err)
+	is.False(disjoint, "Graphs g and h should not be disjoint as they share vertex 2")
+}
 
-		// Test if `g` and `h` are disjoint
-		disjoint, err := IsDisjoint(g, h)
-		is.NoError(err, "IsDisjoint should not return an error")
-		is.False(disjoint, "Graphs g and h should not be disjoint as they share vertex 2")
-	})
+func TestIsDisjointDirectedDisjointGraphs(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-	t.Run("Disjoint Directed Graphs", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	g, _ := simple.New(graph.IntHash, graph.Directed())
+	is.NoError(g.AddVertexWithOptions(1))
+	is.NoError(g.AddVertexWithOptions(2))
+	is.NoError(g.AddEdgeWithOptions(1, 2))
 
-		// Create first directed graph `g`
-		g, _ := simple.New(graph.IntHash, graph.Directed())
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to g should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to g should not fail")
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to g should not fail")
+	h, _ := simple.New(graph.IntHash, graph.Directed())
+	is.NoError(h.AddVertexWithOptions(3))
+	is.NoError(h.AddVertexWithOptions(4))
+	is.NoError(h.AddEdgeWithOptions(3, 4))
 
-		// Create second directed graph `h`
-		h, _ := simple.New(graph.IntHash, graph.Directed())
-		err = h.AddVertexWithOptions(3)
-		is.NoError(err, "Adding vertex 3 to h should not fail")
-		err = h.AddVertexWithOptions(4)
-		is.NoError(err, "Adding vertex 4 to h should not fail")
-		err = h.AddEdgeWithOptions(3, 4)
-		is.NoError(err, "Adding edge (3,4) to h should not fail")
+	disjoint, err := IsDisjoint(g, h)
+	is.NoError(err)
+	is.True(disjoint, "Graphs g and h should be disjoint")
+}
 
-		// Test if `g` and `h` are disjoint
-		disjoint, err := IsDisjoint(g, h)
-		is.NoError(err, "IsDisjoint should not return an error")
-		is.True(disjoint, "Graphs g and h should be disjoint")
-	})
+func TestIsDisjointDirectedNonDisjointGraphs(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-	t.Run("Non-Disjoint Directed Graphs", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	g, _ := simple.New(graph.IntHash, graph.Directed())
+	is.NoError(g.AddVertexWithOptions(1))
+	is.NoError(g.AddVertexWithOptions(2))
+	is.NoError(g.AddEdgeWithOptions(1, 2))
 
-		// Create first directed graph `g`
-		g, _ := simple.New(graph.IntHash, graph.Directed())
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to g should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to g should not fail")
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to g should not fail")
+	h, _ := simple.New(graph.IntHash, graph.Directed())
+	is.NoError(h.AddVertexWithOptions(2))
+	is.NoError(h.AddVertexWithOptions(3))
+	is.NoError(h.AddEdgeWithOptions(2, 3))
 
-		// Create second directed graph `h` with overlapping vertex
-		h, _ := simple.New(graph.IntHash, graph.Directed())
-		err = h.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to h should not fail")
-		err = h.AddVertexWithOptions(3)
-		is.NoError(err, "Adding vertex 3 to h should not fail")
-		err = h.AddEdgeWithOptions(2, 3)
-		is.NoError(err, "Adding edge (2,3) to h should not fail")
-
-		// Test if `g` and `h` are disjoint
-		disjoint, err := IsDisjoint(g, h)
-		is.NoError(err, "IsDisjoint should not return an error")
-		is.False(disjoint, "Graphs g and h should not be disjoint as they share vertex 2")
-	})
+	disjoint, err := IsDisjoint(g, h)
+	is.NoError(err)
+	is.False(disjoint, "Graphs g and h should not be disjoint as they share vertex 2")
 }

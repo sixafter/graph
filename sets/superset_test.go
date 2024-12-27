@@ -13,313 +13,188 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// TestIsSuperset tests the IsSuperset function across various scenarios.
-func TestIsSuperset(t *testing.T) {
+func TestIsSupersetBasic(t *testing.T) {
 	t.Parallel()
+	is := assert.New(t)
 
-	t.Run("Basic Superset", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	g, _ := simple.New(graph.IntHash, graph.Directed())
+	h, _ := simple.New(graph.IntHash, graph.Directed())
 
-		// Create directed graph g with vertices {1, 2, 3} and edges (1,2), (2,3)
-		g, _ := simple.New(graph.IntHash, graph.Directed())
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to g should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to g should not fail")
-		err = g.AddVertexWithOptions(3)
-		is.NoError(err, "Adding vertex 3 to g should not fail")
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to g should not fail")
-		err = g.AddEdgeWithOptions(2, 3)
-		is.NoError(err, "Adding edge (2,3) to g should not fail")
+	is.NoError(g.AddVertexWithOptions(1))
+	is.NoError(g.AddVertexWithOptions(2))
+	is.NoError(g.AddVertexWithOptions(3))
+	is.NoError(g.AddEdgeWithOptions(1, 2))
+	is.NoError(g.AddEdgeWithOptions(2, 3))
 
-		// Create directed graph h with vertices {1, 2} and edge (1,2)
-		h, _ := simple.New(graph.IntHash, graph.Directed())
-		err = h.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to h should not fail")
-		err = h.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to h should not fail")
-		err = h.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to h should not fail")
+	is.NoError(h.AddVertexWithOptions(1))
+	is.NoError(h.AddVertexWithOptions(2))
+	is.NoError(h.AddEdgeWithOptions(1, 2))
 
-		// Check if g is a superset of h
-		superset, err := IsSuperset(g, h)
-		is.NoError(err, "IsSuperset should not return an error")
-		is.True(superset, "Interface g should be a superset of graph h")
-	})
+	superset, err := IsSuperset(g, h)
+	is.NoError(err)
+	is.True(superset, "Graph g should be a superset of graph h")
+}
 
-	t.Run("Not a Superset - Missing Vertex", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+func TestIsSupersetMissingVertex(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-		// Create directed graph g with vertices {1, 2} and edge (1,2)
-		g, _ := simple.New(graph.IntHash, graph.Directed())
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to g should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to g should not fail")
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to g should not fail")
+	g, _ := simple.New(graph.IntHash, graph.Directed())
+	h, _ := simple.New(graph.IntHash, graph.Directed())
 
-		// Create directed graph h with vertices {1, 2, 3} and edge (1,2)
-		h, _ := simple.New(graph.IntHash, graph.Directed())
-		err = h.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to h should not fail")
-		err = h.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to h should not fail")
-		err = h.AddVertexWithOptions(3)
-		is.NoError(err, "Adding vertex 3 to h should not fail")
-		err = h.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to h should not fail")
+	is.NoError(g.AddVertexWithOptions(1))
+	is.NoError(g.AddVertexWithOptions(2))
+	is.NoError(g.AddEdgeWithOptions(1, 2))
 
-		// Check if g is a superset of h
-		superset, err := IsSuperset(g, h)
-		is.NoError(err, "IsSuperset should not return an error")
-		is.False(superset, "Interface g should not be a superset of graph h due to missing vertex 3")
-	})
+	is.NoError(h.AddVertexWithOptions(1))
+	is.NoError(h.AddVertexWithOptions(2))
+	is.NoError(h.AddVertexWithOptions(3))
+	is.NoError(h.AddEdgeWithOptions(1, 2))
 
-	t.Run("Not a Superset - Missing Edge", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	superset, err := IsSuperset(g, h)
+	is.NoError(err)
+	is.False(superset, "Graph g should not be a superset of graph h due to missing vertex 3")
+}
 
-		// Create directed graph g with vertices {1, 2} and edge (1,2)
-		g, _ := simple.New(graph.IntHash, graph.Directed())
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to g should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to g should not fail")
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to g should not fail")
+func TestIsSupersetMissingEdge(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-		// Create directed graph h with vertices {1, 2} but no edges
-		h, _ := simple.New(graph.IntHash, graph.Directed())
-		err = h.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to h should not fail")
-		err = h.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to h should not fail")
+	g, _ := simple.New(graph.IntHash, graph.Directed())
+	h, _ := simple.New(graph.IntHash, graph.Directed())
 
-		// Check if g is a superset of h
-		superset, err := IsSuperset(g, h)
-		is.NoError(err, "IsSuperset should not return an error")
-		is.True(superset, "Interface g should be a superset of graph h as h has no edges")
-	})
+	is.NoError(g.AddVertexWithOptions(1))
+	is.NoError(g.AddVertexWithOptions(2))
+	is.NoError(g.AddEdgeWithOptions(1, 2))
 
-	t.Run("Empty Interface h", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	is.NoError(h.AddVertexWithOptions(1))
+	is.NoError(h.AddVertexWithOptions(2))
 
-		// Create any directed graph g
-		g, _ := simple.New(graph.IntHash, graph.Directed())
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to g should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to g should not fail")
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to g should not fail")
+	superset, err := IsSuperset(g, h)
+	is.NoError(err)
+	is.True(superset, "Graph g should be a superset of graph h as h has no edges")
+}
 
-		// Create an empty directed graph h
-		h, _ := simple.New(graph.IntHash, graph.Directed())
+func TestIsSupersetEmptyGraph(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-		// Check if g is a superset of h
-		superset, err := IsSuperset(g, h)
-		is.NoError(err, "IsSuperset should not return an error")
-		is.True(superset, "Any graph g should be a superset of an empty graph h")
-	})
+	g, _ := simple.New(graph.IntHash, graph.Directed())
+	h, _ := simple.New(graph.IntHash, graph.Directed())
 
-	t.Run("Identical Graphs", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	is.NoError(g.AddVertexWithOptions(1))
+	is.NoError(g.AddVertexWithOptions(2))
+	is.NoError(g.AddEdgeWithOptions(1, 2))
 
-		// Create undirected graph g with vertices {1, 2, 3} and edges (1,2), (2,3), (3,1)
-		g, _ := simple.New(graph.IntHash) // undirected by default
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to g should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to g should not fail")
-		err = g.AddVertexWithOptions(3)
-		is.NoError(err, "Adding vertex 3 to g should not fail")
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to g should not fail")
-		err = g.AddEdgeWithOptions(2, 3)
-		is.NoError(err, "Adding edge (2,3) to g should not fail")
-		err = g.AddEdgeWithOptions(3, 1)
-		is.NoError(err, "Adding edge (3,1) to g should not fail")
+	superset, err := IsSuperset(g, h)
+	is.NoError(err)
+	is.True(superset, "Any graph g should be a superset of an empty graph h")
+}
 
-		// Create identical undirected graph h
-		h, _ := simple.New(graph.IntHash) // undirected by default
-		err = h.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to h should not fail")
-		err = h.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to h should not fail")
-		err = h.AddVertexWithOptions(3)
-		is.NoError(err, "Adding vertex 3 to h should not fail")
-		err = h.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to h should not fail")
-		err = h.AddEdgeWithOptions(2, 3)
-		is.NoError(err, "Adding edge (2,3) to h should not fail")
-		err = h.AddEdgeWithOptions(3, 1)
-		is.NoError(err, "Adding edge (3,1) to h should not fail")
+func TestIsSupersetIdenticalGraphs(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-		// Check if g is a superset of h
-		superset, err := IsSuperset(g, h)
-		is.NoError(err, "IsSuperset should not return an error")
-		is.True(superset, "Identical graphs g and h should satisfy IsSuperset")
-	})
+	g, _ := simple.New(graph.IntHash)
+	h, _ := simple.New(graph.IntHash)
 
-	t.Run("Different Traits", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	for _, vertex := range []int{1, 2, 3} {
+		is.NoError(g.AddVertexWithOptions(vertex))
+		is.NoError(h.AddVertexWithOptions(vertex))
+	}
 
-		// Create undirected graph g with vertices {1, 2} and edge (1,2)
-		g, _ := simple.New(graph.IntHash) // undirected by default
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to g should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to g should not fail")
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to g should not fail")
+	for _, edge := range [][2]int{{1, 2}, {2, 3}, {3, 1}} {
+		is.NoError(g.AddEdgeWithOptions(edge[0], edge[1]))
+		is.NoError(h.AddEdgeWithOptions(edge[0], edge[1]))
+	}
 
-		// Create directed graph h with vertices {1, 2} and edge (1,2)
-		h, _ := simple.New(graph.IntHash, graph.Directed())
-		err = h.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to h should not fail")
-		err = h.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to h should not fail")
-		err = h.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to h should not fail")
+	superset, err := IsSuperset(g, h)
+	is.NoError(err)
+	is.True(superset, "Identical graphs g and h should satisfy IsSuperset")
+}
 
-		// Check if g is a superset of h
-		superset, err := IsSuperset(g, h)
-		is.ErrorIs(err, graph.ErrGraphTypeMismatch, "IsSuperset should return ErrGraphTypeMismatch due to different traits")
-		is.False(superset, "Interface g should not be a superset of graph h due to different traits")
-	})
+func TestIsSupersetDifferentTraits(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-	t.Run("Directed Graphs Superset", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	g, _ := simple.New(graph.IntHash)
+	h, _ := simple.New(graph.IntHash, graph.Directed())
 
-		// Create directed graph g with vertices {1, 2, 3} and edges (1,2), (2,3)
-		g, _ := simple.New(graph.IntHash, graph.Directed())
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to g should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to g should not fail")
-		err = g.AddVertexWithOptions(3)
-		is.NoError(err, "Adding vertex 3 to g should not fail")
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to g should not fail")
-		err = g.AddEdgeWithOptions(2, 3)
-		is.NoError(err, "Adding edge (2,3) to g should not fail")
+	is.NoError(g.AddVertexWithOptions(1))
+	is.NoError(g.AddVertexWithOptions(2))
+	is.NoError(g.AddEdgeWithOptions(1, 2))
 
-		// Create directed graph h with vertices {1, 2} and edge (1,2)
-		h, _ := simple.New(graph.IntHash, graph.Directed())
-		err = h.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to h should not fail")
-		err = h.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to h should not fail")
-		err = h.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to h should not fail")
+	is.NoError(h.AddVertexWithOptions(1))
+	is.NoError(h.AddVertexWithOptions(2))
+	is.NoError(h.AddEdgeWithOptions(1, 2))
 
-		// Check if g is a superset of h
-		superset, err := IsSuperset(g, h)
-		is.NoError(err, "IsSuperset should not return an error")
-		is.True(superset, "Interface g should be a superset of graph h")
-	})
+	superset, err := IsSuperset(g, h)
+	is.ErrorIs(err, graph.ErrGraphTypeMismatch)
+	is.False(superset, "Graphs with different traits should not satisfy IsSuperset")
+}
 
-	t.Run("undirected Graphs Superset", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+func TestIsSupersetNoCommonVertices(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-		// Create undirected graph g with vertices {1, 2, 3} and edges (1,2), (2,3)
-		g, _ := simple.New(graph.IntHash) // undirected by default
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to g should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to g should not fail")
-		err = g.AddVertexWithOptions(3)
-		is.NoError(err, "Adding vertex 3 to g should not fail")
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to g should not fail")
-		err = g.AddEdgeWithOptions(2, 3)
-		is.NoError(err, "Adding edge (2,3) to g should not fail")
+	g, _ := simple.New(graph.IntHash, graph.Directed())
+	h, _ := simple.New(graph.IntHash, graph.Directed())
 
-		// Create undirected graph h with vertices {1, 2} and edge (1,2)
-		h, _ := simple.New(graph.IntHash) // undirected by default
-		err = h.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to h should not fail")
-		err = h.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to h should not fail")
-		err = h.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to h should not fail")
+	is.NoError(g.AddVertexWithOptions(1))
+	is.NoError(g.AddVertexWithOptions(2))
+	is.NoError(g.AddEdgeWithOptions(1, 2))
 
-		// Check if g is a superset of h
-		superset, err := IsSuperset(g, h)
-		is.NoError(err, "IsSuperset should not return an error")
-		is.True(superset, "undirected graph g should be a superset of graph h")
-	})
+	is.NoError(h.AddVertexWithOptions(3))
+	is.NoError(h.AddVertexWithOptions(4))
+	is.NoError(h.AddEdgeWithOptions(3, 4))
 
-	t.Run("No Common Vertices", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	superset, err := IsSuperset(g, h)
+	is.NoError(err)
+	is.False(superset, "Graphs with no common vertices should not satisfy IsSuperset")
+}
 
-		// Create directed graph g with vertices {1, 2} and edge (1,2)
-		g, _ := simple.New(graph.IntHash, graph.Directed())
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to g should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to g should not fail")
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to g should not fail")
+func TestIsSupersetWithExtraVerticesAndEdges(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-		// Create directed graph h with vertices {3, 4} and edge (3,4)
-		h, _ := simple.New(graph.IntHash, graph.Directed())
-		err = h.AddVertexWithOptions(3)
-		is.NoError(err, "Adding vertex 3 to h should not fail")
-		err = h.AddVertexWithOptions(4)
-		is.NoError(err, "Adding vertex 4 to h should not fail")
-		err = h.AddEdgeWithOptions(3, 4)
-		is.NoError(err, "Adding edge (3,4) to h should not fail")
+	g, _ := simple.New(graph.IntHash, graph.Directed())
+	h, _ := simple.New(graph.IntHash, graph.Directed())
 
-		// Check if g is a superset of h
-		superset, err := IsSuperset(g, h)
-		is.NoError(err, "IsSuperset should not return an error")
-		is.False(superset, "Interface g should not be a superset of graph h as there are no common vertices")
-	})
+	is.NoError(g.AddVertexWithOptions(1))
+	is.NoError(g.AddVertexWithOptions(2))
+	is.NoError(g.AddVertexWithOptions(3))
+	is.NoError(g.AddVertexWithOptions(4))
+	is.NoError(g.AddEdgeWithOptions(1, 2))
+	is.NoError(g.AddEdgeWithOptions(2, 3))
+	is.NoError(g.AddEdgeWithOptions(3, 4))
 
-	t.Run("Superset with Extra Vertices and Edges", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	is.NoError(h.AddVertexWithOptions(1))
+	is.NoError(h.AddVertexWithOptions(2))
+	is.NoError(h.AddEdgeWithOptions(1, 2))
 
-		// Create directed graph g with vertices {1, 2, 3, 4} and edges (1,2), (2,3), (3,4)
-		g, _ := simple.New(graph.IntHash, graph.Directed())
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to g should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to g should not fail")
-		err = g.AddVertexWithOptions(3)
-		is.NoError(err, "Adding vertex 3 to g should not fail")
-		err = g.AddVertexWithOptions(4)
-		is.NoError(err, "Adding vertex 4 to g should not fail")
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to g should not fail")
-		err = g.AddEdgeWithOptions(2, 3)
-		is.NoError(err, "Adding edge (2,3) to g should not fail")
-		err = g.AddEdgeWithOptions(3, 4)
-		is.NoError(err, "Adding edge (3,4) to g should not fail")
+	superset, err := IsSuperset(g, h)
+	is.NoError(err)
+	is.True(superset, "Graph g should be a superset of graph h")
+}
 
-		// Create directed graph h with vertices {1, 2} and edge (1,2)
-		h, _ := simple.New(graph.IntHash, graph.Directed())
-		err = h.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to h should not fail")
-		err = h.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to h should not fail")
-		err = h.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to h should not fail")
+func TestIsSupersetDirectedGraphs(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-		// Check if g is a superset of h
-		superset, err := IsSuperset(g, h)
-		is.NoError(err, "IsSuperset should not return an error")
-		is.True(superset, "Interface g should be a superset of graph h")
-	})
+	g, _ := simple.New(graph.IntHash, graph.Directed())
+	h, _ := simple.New(graph.IntHash, graph.Directed())
+
+	is.NoError(g.AddVertexWithOptions(1))
+	is.NoError(g.AddVertexWithOptions(2))
+	is.NoError(g.AddVertexWithOptions(3))
+	is.NoError(g.AddEdgeWithOptions(1, 2))
+	is.NoError(g.AddEdgeWithOptions(2, 3))
+
+	is.NoError(h.AddVertexWithOptions(1))
+	is.NoError(h.AddVertexWithOptions(2))
+	is.NoError(h.AddEdgeWithOptions(1, 2))
+
+	superset, err := IsSuperset(g, h)
+	is.NoError(err)
+	is.True(superset, "Directed graph g should be a superset of graph h")
 }

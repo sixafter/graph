@@ -13,255 +13,171 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// TestEquals tests the Equals function across various scenarios.
-func TestEquals(t *testing.T) {
+func TestEqualsIdenticalGraphs(t *testing.T) {
 	t.Parallel()
+	is := assert.New(t)
 
-	t.Run("Identical Graphs", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	g, _ := simple.New(graph.IntHash)
+	h, _ := simple.New(graph.IntHash)
 
-		// Create undirected graph g with vertices {1, 2, 3} and edges (1,2), (2,3), (3,1)
-		g, _ := simple.New(graph.IntHash) // undirected by default
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to g should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to g should not fail")
-		err = g.AddVertexWithOptions(3)
-		is.NoError(err, "Adding vertex 3 to g should not fail")
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to g should not fail")
-		err = g.AddEdgeWithOptions(2, 3)
-		is.NoError(err, "Adding edge (2,3) to g should not fail")
-		err = g.AddEdgeWithOptions(3, 1)
-		is.NoError(err, "Adding edge (3,1) to g should not fail")
+	for _, vertex := range []int{1, 2, 3} {
+		is.NoError(g.AddVertexWithOptions(vertex))
+		is.NoError(h.AddVertexWithOptions(vertex))
+	}
 
-		// Create identical undirected graph h
-		h, _ := simple.New(graph.IntHash) // undirected by default
-		err = h.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to h should not fail")
-		err = h.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to h should not fail")
-		err = h.AddVertexWithOptions(3)
-		is.NoError(err, "Adding vertex 3 to h should not fail")
-		err = h.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to h should not fail")
-		err = h.AddEdgeWithOptions(2, 3)
-		is.NoError(err, "Adding edge (2,3) to h should not fail")
-		err = h.AddEdgeWithOptions(3, 1)
-		is.NoError(err, "Adding edge (3,1) to h should not fail")
+	for _, edge := range [][2]int{{1, 2}, {2, 3}, {3, 1}} {
+		is.NoError(g.AddEdgeWithOptions(edge[0], edge[1]))
+		is.NoError(h.AddEdgeWithOptions(edge[0], edge[1]))
+	}
 
-		// Check if g isEqual h
-		isEqual, err := Equals(g, h)
-		is.NoError(err, "Equals should not return an error")
-		is.True(isEqual, "Identical graphs g and h should satisfy Equals")
-	})
+	equals, err := Equals(g, h)
+	is.NoError(err)
+	is.True(equals, "Identical graphs g and h should be equal")
+}
 
-	t.Run("Different Traits", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+func TestEqualsDifferentTraits(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-		// Create undirected graph g with vertices {1, 2} and edge (1,2)
-		g, _ := simple.New(graph.IntHash) // undirected by default
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to g should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to g should not fail")
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to g should not fail")
+	g, _ := simple.New(graph.IntHash)                   // undirected
+	h, _ := simple.New(graph.IntHash, graph.Directed()) // directed
 
-		// Create directed graph h with vertices {1, 2} and edge (1,2)
-		h, _ := simple.New(graph.IntHash, graph.Directed())
-		err = h.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to h should not fail")
-		err = h.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to h should not fail")
-		err = h.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to h should not fail")
+	for _, vertex := range []int{1, 2} {
+		is.NoError(g.AddVertexWithOptions(vertex))
+		is.NoError(h.AddVertexWithOptions(vertex))
+	}
 
-		// Check if g equals h
-		equals, err := Equals(g, h)
-		is.ErrorIs(err, graph.ErrGraphTypeMismatch, "Equals should return ErrGraphTypeMismatch due to different traits")
-		is.False(equals, "Graphs with different traits should not be equal")
-	})
+	is.NoError(g.AddEdgeWithOptions(1, 2))
+	is.NoError(h.AddEdgeWithOptions(1, 2))
 
-	t.Run("Different Vertices", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	equals, err := Equals(g, h)
+	is.ErrorIs(err, graph.ErrGraphTypeMismatch)
+	is.False(equals, "Graphs with different traits should not be equal")
+}
 
-		// Create undirected graph g with vertices {1, 2, 3}
-		g, _ := simple.New(graph.IntHash) // undirected by default
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to g should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to g should not fail")
-		err = g.AddVertexWithOptions(3)
-		is.NoError(err, "Adding vertex 3 to g should not fail")
+func TestEqualsDifferentVertices(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-		// Create undirected graph h with vertices {1, 2, 4}
-		h, _ := simple.New(graph.IntHash) // undirected by default
-		err = h.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to h should not fail")
-		err = h.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to h should not fail")
-		err = h.AddVertexWithOptions(4)
-		is.NoError(err, "Adding vertex 4 to h should not fail")
+	g, _ := simple.New(graph.IntHash)
+	h, _ := simple.New(graph.IntHash)
 
-		// Check if g equals h
-		equals, err := Equals(g, h)
-		is.NoError(err, "Equals should not return an error")
-		is.False(equals, "Graphs g and h should not be equal due to different vertices")
-	})
+	for _, vertex := range []int{1, 2, 3} {
+		is.NoError(g.AddVertexWithOptions(vertex))
+	}
+	for _, vertex := range []int{1, 2, 4} {
+		is.NoError(h.AddVertexWithOptions(vertex))
+	}
 
-	t.Run("Different Edges", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	equals, err := Equals(g, h)
+	is.NoError(err)
+	is.False(equals, "Graphs with different vertices should not be equal")
+}
 
-		// Create undirected graph g with vertices {1, 2, 3} and edges (1,2), (2,3)
-		g, _ := simple.New(graph.IntHash) // undirected by default
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to g should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to g should not fail")
-		err = g.AddVertexWithOptions(3)
-		is.NoError(err, "Adding vertex 3 to g should not fail")
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to g should not fail")
-		err = g.AddEdgeWithOptions(2, 3)
-		is.NoError(err, "Adding edge (2,3) to g should not fail")
+func TestEqualsDifferentEdges(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-		// Create undirected graph h with vertices {1, 2, 3} and edges (1,2), (3,1)
-		h, _ := simple.New(graph.IntHash) // undirected by default
-		err = h.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to h should not fail")
-		err = h.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to h should not fail")
-		err = h.AddVertexWithOptions(3)
-		is.NoError(err, "Adding vertex 3 to h should not fail")
-		err = h.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to h should not fail")
-		err = h.AddEdgeWithOptions(3, 1)
-		is.NoError(err, "Adding edge (3,1) to h should not fail")
+	g, _ := simple.New(graph.IntHash)
+	h, _ := simple.New(graph.IntHash)
 
-		// Check if g equals h
-		equals, err := Equals(g, h)
-		is.NoError(err, "Equals should not return an error")
-		is.False(equals, "Graphs g and h should not be equal due to different edges")
-	})
+	for _, vertex := range []int{1, 2, 3} {
+		is.NoError(g.AddVertexWithOptions(vertex))
+		is.NoError(h.AddVertexWithOptions(vertex))
+	}
 
-	t.Run("Both Empty Graphs", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	is.NoError(g.AddEdgeWithOptions(1, 2))
+	is.NoError(g.AddEdgeWithOptions(2, 3))
 
-		// Create empty directed graph g
-		g, _ := simple.New(graph.IntHash, graph.Directed())
+	is.NoError(h.AddEdgeWithOptions(1, 2))
+	is.NoError(h.AddEdgeWithOptions(3, 1))
 
-		// Create empty directed graph h
-		h, _ := simple.New(graph.IntHash, graph.Directed())
+	equals, err := Equals(g, h)
+	is.NoError(err)
+	is.False(equals, "Graphs with different edges should not be equal")
+}
 
-		// Check if g equals h
-		equals, err := Equals(g, h)
-		is.NoError(err, "Equals should not return an error")
-		is.True(equals, "Both empty graphs g and h should be equal")
-	})
+func TestEqualsBothEmptyGraphs(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-	t.Run("One Empty, One Non-Empty", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	g, _ := simple.New(graph.IntHash, graph.Directed())
+	h, _ := simple.New(graph.IntHash, graph.Directed())
 
-		// Create empty directed graph g
-		g, _ := simple.New(graph.IntHash, graph.Directed())
+	equals, err := Equals(g, h)
+	is.NoError(err)
+	is.True(equals, "Both empty graphs should be equal")
+}
 
-		// Create directed graph h with vertices and edges
-		h, _ := simple.New(graph.IntHash, graph.Directed())
-		err := h.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to h should not fail")
-		err = h.AddEdgeWithOptions(1, 1) // Self-loop
-		is.NoError(err, "Adding edge (1,1) to h should not fail")
+func TestEqualsOneEmptyOneNonEmpty(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-		// Check if g equals h
-		equals, err := Equals(g, h)
-		is.NoError(err, "Equals should not return an error")
-		is.False(equals, "Empty graph g should not equal non-empty graph h")
-	})
+	g, _ := simple.New(graph.IntHash, graph.Directed())
+	h, _ := simple.New(graph.IntHash, graph.Directed())
 
-	t.Run("Same Vertices, Different Edge Directions (Directed Graphs)", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	is.NoError(h.AddVertexWithOptions(1))
+	is.NoError(h.AddEdgeWithOptions(1, 1)) // self-loop
 
-		// Create directed graph g with vertices {1, 2} and edge (1,2)
-		g, _ := simple.New(graph.IntHash, graph.Directed())
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to g should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to g should not fail")
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to g should not fail")
+	equals, err := Equals(g, h)
+	is.NoError(err)
+	is.False(equals, "An empty graph should not equal a non-empty graph")
+}
 
-		// Create directed graph h with vertices {1, 2} and edge (2,1)
-		h, _ := simple.New(graph.IntHash, graph.Directed())
-		err = h.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to h should not fail")
-		err = h.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to h should not fail")
-		err = h.AddEdgeWithOptions(2, 1)
-		is.NoError(err, "Adding edge (2,1) to h should not fail")
+func TestEqualsDirectedDifferentEdgeDirections(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-		// Check if g equals h
-		equals, err := Equals(g, h)
-		is.NoError(err, "Equals should not return an error")
-		is.False(equals, "Graphs g and h should not be equal due to different edge directions")
-	})
+	g, _ := simple.New(graph.IntHash, graph.Directed())
+	h, _ := simple.New(graph.IntHash, graph.Directed())
 
-	t.Run("Same Vertices, Different Edge Directions (undirected Graphs)", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	for _, vertex := range []int{1, 2} {
+		is.NoError(g.AddVertexWithOptions(vertex))
+		is.NoError(h.AddVertexWithOptions(vertex))
+	}
 
-		// Create undirected graph g with vertices {1, 2} and edge (1,2)
-		g, _ := simple.New(graph.IntHash) // undirected by default
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to g should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to g should not fail")
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to g should not fail")
+	is.NoError(g.AddEdgeWithOptions(1, 2))
+	is.NoError(h.AddEdgeWithOptions(2, 1))
 
-		// Create undirected graph h with vertices {1, 2} and edge (2,1)
-		h, _ := simple.New(graph.IntHash) // undirected by default
-		err = h.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to h should not fail")
-		err = h.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to h should not fail")
-		err = h.AddEdgeWithOptions(2, 1)
-		is.NoError(err, "Adding edge (2,1) to h should not fail")
+	equals, err := Equals(g, h)
+	is.NoError(err)
+	is.False(equals, "Directed graphs with different edge directions should not be equal")
+}
 
-		// Check if g equals h
-		equals, err := Equals(g, h)
-		is.NoError(err, "Equals should not return an error")
-		is.True(equals, "undirected graphs g and h should be equal as edge direction is irrelevant")
-	})
+func TestEqualsUndirectedDifferentEdgeDirections(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-	t.Run("Graphs with Self-Loops", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	g, _ := simple.New(graph.IntHash)
+	h, _ := simple.New(graph.IntHash)
 
-		// Create directed graph g with self-loop on vertex 1
-		g, _ := simple.New(graph.IntHash, graph.Directed())
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to g should not fail")
-		err = g.AddEdgeWithOptions(1, 1)
-		is.NoError(err, "Adding self-loop (1,1) to g should not fail")
+	for _, vertex := range []int{1, 2} {
+		is.NoError(g.AddVertexWithOptions(vertex))
+		is.NoError(h.AddVertexWithOptions(vertex))
+	}
 
-		// Create directed graph h with self-loop on vertex 1
-		h, _ := simple.New(graph.IntHash, graph.Directed())
-		err = h.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to h should not fail")
-		err = h.AddEdgeWithOptions(1, 1)
-		is.NoError(err, "Adding self-loop (1,1) to h should not fail")
+	is.NoError(g.AddEdgeWithOptions(1, 2))
+	is.NoError(h.AddEdgeWithOptions(2, 1))
 
-		// Check if g equals h
-		equals, err := Equals(g, h)
-		is.NoError(err, "Equals should not return an error")
-		is.True(equals, "Graphs g and h should be equal as they have identical self-loops")
-	})
+	equals, err := Equals(g, h)
+	is.NoError(err)
+	is.True(equals, "Undirected graphs should be equal regardless of edge direction")
+}
+
+func TestEqualsGraphsWithSelfLoops(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	g, _ := simple.New(graph.IntHash, graph.Directed())
+	h, _ := simple.New(graph.IntHash, graph.Directed())
+
+	is.NoError(g.AddVertexWithOptions(1))
+	is.NoError(g.AddEdgeWithOptions(1, 1)) // self-loop
+
+	is.NoError(h.AddVertexWithOptions(1))
+	is.NoError(h.AddEdgeWithOptions(1, 1)) // self-loop
+
+	equals, err := Equals(g, h)
+	is.NoError(err)
+	is.True(equals, "Graphs with identical self-loops should be equal")
 }

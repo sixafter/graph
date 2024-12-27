@@ -11,152 +11,178 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestPriorityQueue(t *testing.T) {
+func TestPriorityQueuePushPop(t *testing.T) {
 	t.Parallel()
+	is := assert.New(t)
 
-	t.Run("Push and Pop items in priority order", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	pq := NewPriorityQueue[string]()
+	pq.Push("low", 10.0)
+	pq.Push("medium", 5.0)
+	pq.Push("high", 1.0)
 
-		pq := NewPriorityQueue[string]()
-		pq.Push("low", 10.0)
-		pq.Push("medium", 5.0)
-		pq.Push("high", 1.0)
+	item, err := pq.Pop()
+	is.NoError(err)
+	is.Equal("high", item, "Expected item with highest priority (lowest value)")
 
-		item, err := pq.Pop()
-		is.NoError(err)
-		is.Equal("high", item, "Expected item with highest priority (lowest value)")
+	item, err = pq.Pop()
+	is.NoError(err)
+	is.Equal("medium", item, "Expected next highest priority item")
 
-		item, err = pq.Pop()
-		is.NoError(err)
-		is.Equal("medium", item, "Expected next highest priority item")
+	item, err = pq.Pop()
+	is.NoError(err)
+	is.Equal("low", item, "Expected last item with lowest priority")
 
-		item, err = pq.Pop()
-		is.NoError(err)
-		is.Equal("low", item, "Expected last item with lowest priority")
-
-		_, err = pq.Pop()
-		is.Error(err)
-		is.ErrorIs(err, ErrPriorityQueueEmpty)
-	})
-
-	t.Run("SetPriority updates item priority", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
-
-		pq := NewPriorityQueue[string]()
-		pq.Push("task1", 3.0)
-		pq.Push("task2", 2.0)
-		pq.SetPriority("task1", 1.0)
-
-		item, err := pq.Pop()
-		is.NoError(err)
-		is.Equal("task1", item, "task1 priority was updated to highest")
-	})
+	_, err = pq.Pop()
+	is.Error(err)
+	is.ErrorIs(err, ErrPriorityQueueEmpty)
 }
 
-func TestStack(t *testing.T) {
+func TestPriorityQueueSetPriority(t *testing.T) {
 	t.Parallel()
+	is := assert.New(t)
 
-	t.Run("Push and Pop items", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	pq := NewPriorityQueue[string]()
+	pq.Push("task1", 3.0)
+	pq.Push("task2", 2.0)
+	pq.SetPriority("task1", 1.0)
 
-		s := NewStack[int]()
-		s.Push(1)
-		s.Push(2)
-		s.Push(3)
-
-		item, ok := s.Pop()
-		is.True(ok)
-		is.Equal(3, item, "Expected last pushed item")
-
-		item, ok = s.Pop()
-		is.True(ok)
-		is.Equal(2, item, "Expected second-to-last pushed item")
-
-		item, ok = s.Pop()
-		is.True(ok)
-		is.Equal(1, item, "Expected first pushed item")
-
-		_, ok = s.Pop()
-		is.False(ok, "Stack should be empty")
-	})
-
-	t.Run("Contains checks item existence", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
-
-		s := NewStack[int]()
-		s.Push(1)
-		s.Push(2)
-
-		is.True(s.Contains(1))
-		is.True(s.Contains(2))
-		is.False(s.Contains(3))
-	})
-
-	t.Run("IsEmpty detects empty Stack", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
-
-		s := NewStack[int]()
-		is.True(s.IsEmpty())
-
-		s.Push(1)
-		is.False(s.IsEmpty())
-	})
+	item, err := pq.Pop()
+	is.NoError(err)
+	is.Equal("task1", item, "task1 priority was updated to highest")
 }
 
-func TestStackOfStacks(t *testing.T) {
+func TestStackPushPop(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	s := NewStack[int]()
+	s.Push(1)
+	s.Push(2)
+	s.Push(3)
+
+	item, ok := s.Pop()
+	is.True(ok)
+	is.Equal(3, item, "Expected last pushed item")
+
+	item, ok = s.Pop()
+	is.True(ok)
+	is.Equal(2, item, "Expected second-to-last pushed item")
+
+	item, ok = s.Pop()
+	is.True(ok)
+	is.Equal(1, item, "Expected first pushed item")
+
+	_, ok = s.Pop()
+	is.False(ok, "Stack should be empty")
+}
+
+func TestStackContains(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	s := NewStack[int]()
+	s.Push(1)
+	s.Push(2)
+
+	is.True(s.Contains(1))
+	is.True(s.Contains(2))
+	is.False(s.Contains(3))
+}
+
+func TestStackIsEmpty(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	s := NewStack[int]()
+	is.True(s.IsEmpty())
+
+	s.Push(1)
+	is.False(s.IsEmpty())
+}
+
+func TestStackOfStacksPushPop(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	sos := NewStackOfStacks[int]()
+	stack1 := NewStack[int]()
+	stack2 := NewStack[int]()
+
+	stack1.Push(1)
+	stack2.Push(2)
+
+	sos.Push(stack1)
+	sos.Push(stack2)
+
+	topStack, err := sos.Pop()
+	is.NoError(err)
+	topItem, ok := topStack.Pop()
+	is.True(ok)
+	is.Equal(2, topItem, "Expected item from the top stack")
+
+	topStack, err = sos.Pop()
+	is.NoError(err)
+	topItem, ok = topStack.Pop()
+	is.True(ok)
+	is.Equal(1, topItem, "Expected item from the second stack")
+
+	_, err = sos.Pop()
+	is.Error(err)
+	is.ErrorIs(err, ErrStackEmpty)
+}
+
+func TestStackOfStacksTop(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	sos := NewStackOfStacks[int]()
+	stack := NewStack[int]()
+	stack.Push(42)
+
+	sos.Push(stack)
+
+	topStack, err := sos.Top()
+	is.NoError(err)
+
+	topItem, ok := topStack.Top()
+	is.True(ok)
+	is.Equal(42, topItem, "Expected item from the top stack")
+}
+
+func TestPriorityQueueUpdateNonexistentItem(t *testing.T) {
 	t.Parallel()
 
-	t.Run("Push and Pop stacks", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	pq := NewPriorityQueue[string]()
+	pq.Push("task1", 5.0)
 
-		sos := NewStackOfStacks[int]()
-		stack1 := NewStack[int]()
-		stack2 := NewStack[int]()
+	pq.SetPriority("task2", 1.0)
+}
 
-		stack1.Push(1)
-		stack2.Push(2)
+func TestStackUnderflow(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-		sos.Push(stack1)
-		sos.Push(stack2)
+	s := NewStack[int]()
+	_, ok := s.Pop()
+	is.False(ok, "Popping from an empty stack should fail")
+}
 
-		topStack, err := sos.Pop()
-		is.NoError(err)
-		topItem, ok := topStack.Pop()
-		is.True(ok)
-		is.Equal(2, topItem, "Expected item from the Top Stack")
+func TestStackOfStacksUnderflow(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-		topStack, err = sos.Pop()
-		is.NoError(err)
-		topItem, ok = topStack.Pop()
-		is.True(ok)
-		is.Equal(1, topItem, "Expected item from the second Stack")
+	sos := NewStackOfStacks[int]()
+	_, err := sos.Pop()
+	is.Error(err, "Popping from an empty stack of stacks should fail")
+	is.ErrorIs(err, ErrStackEmpty)
+}
 
-		_, err = sos.Pop()
-		is.Error(err)
-		is.ErrorIs(err, ErrStackEmpty)
-	})
+func TestPriorityQueueEmpty(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-	t.Run("Top returns the Top Stack without removing it", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
-
-		sos := NewStackOfStacks[int]()
-		stack := NewStack[int]()
-		stack.Push(42)
-
-		sos.Push(stack)
-
-		topStack, err := sos.Top()
-		is.NoError(err)
-
-		topItem, ok := topStack.Top()
-		is.True(ok)
-		is.Equal(42, topItem, "Expected item from the Top Stack")
-	})
+	pq := NewPriorityQueue[string]()
+	_, err := pq.Pop()
+	is.Error(err, "Popping from an empty priority queue should fail")
+	is.ErrorIs(err, ErrPriorityQueueEmpty)
 }

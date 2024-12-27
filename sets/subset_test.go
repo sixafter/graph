@@ -13,353 +13,192 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// TestIsSubset tests the IsSubset function across various scenarios.
-func TestIsSubset(t *testing.T) {
+func TestIsSubsetBasic(t *testing.T) {
 	t.Parallel()
+	is := assert.New(t)
 
-	t.Run("Basic Subset", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	g, _ := simple.New(graph.IntHash, graph.Directed())
+	h, _ := simple.New(graph.IntHash, graph.Directed())
 
-		// Create directed graph g with vertices {1, 2} and edge (1,2)
-		g, _ := simple.New(graph.IntHash, graph.Directed())
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to g should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to g should not fail")
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to g should not fail")
+	is.NoError(g.AddVertexWithOptions(1))
+	is.NoError(g.AddVertexWithOptions(2))
+	is.NoError(g.AddEdgeWithOptions(1, 2))
 
-		// Create directed graph h with vertices {1, 2, 3} and edges (1,2), (2,3)
-		h, _ := simple.New(graph.IntHash, graph.Directed())
-		err = h.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to h should not fail")
-		err = h.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to h should not fail")
-		err = h.AddVertexWithOptions(3)
-		is.NoError(err, "Adding vertex 3 to h should not fail")
-		err = h.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to h should not fail")
-		err = h.AddEdgeWithOptions(2, 3)
-		is.NoError(err, "Adding edge (2,3) to h should not fail")
+	is.NoError(h.AddVertexWithOptions(1))
+	is.NoError(h.AddVertexWithOptions(2))
+	is.NoError(h.AddVertexWithOptions(3))
+	is.NoError(h.AddEdgeWithOptions(1, 2))
+	is.NoError(h.AddEdgeWithOptions(2, 3))
 
-		// Check if g is a subset of h
-		subset, err := IsSubset(g, h)
-		is.NoError(err, "IsSubset should not return an error")
-		is.True(subset, "Interface g should be a subset of graph h")
-	})
+	subset, err := IsSubset(g, h)
+	is.NoError(err)
+	is.True(subset, "Graph g should be a subset of graph h")
+}
 
-	t.Run("Not a Subset - Missing Vertex", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+func TestIsSubsetMissingVertex(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-		// Create directed graph g with vertices {1, 2, 4} and edge (1,2)
-		g, _ := simple.New(graph.IntHash, graph.Directed())
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to g should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to g should not fail")
-		err = g.AddVertexWithOptions(4)
-		is.NoError(err, "Adding vertex 4 to g should not fail")
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to g should not fail")
+	g, _ := simple.New(graph.IntHash, graph.Directed())
+	h, _ := simple.New(graph.IntHash, graph.Directed())
 
-		// Create directed graph h with vertices {1, 2, 3} and edges (1,2), (2,3)
-		h, _ := simple.New(graph.IntHash, graph.Directed())
-		err = h.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to h should not fail")
-		err = h.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to h should not fail")
-		err = h.AddVertexWithOptions(3)
-		is.NoError(err, "Adding vertex 3 to h should not fail")
-		err = h.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to h should not fail")
-		err = h.AddEdgeWithOptions(2, 3)
-		is.NoError(err, "Adding edge (2,3) to h should not fail")
+	is.NoError(g.AddVertexWithOptions(1))
+	is.NoError(g.AddVertexWithOptions(2))
+	is.NoError(g.AddVertexWithOptions(4))
+	is.NoError(g.AddEdgeWithOptions(1, 2))
 
-		// Check if g is a subset of h
-		subset, err := IsSubset(g, h)
-		is.NoError(err, "IsSubset should not return an error")
-		is.False(subset, "Interface g should not be a subset of graph h due to missing vertex 4")
-	})
+	is.NoError(h.AddVertexWithOptions(1))
+	is.NoError(h.AddVertexWithOptions(2))
+	is.NoError(h.AddVertexWithOptions(3))
+	is.NoError(h.AddEdgeWithOptions(1, 2))
+	is.NoError(h.AddEdgeWithOptions(2, 3))
 
-	t.Run("Not a Subset - Missing Edge", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	subset, err := IsSubset(g, h)
+	is.NoError(err)
+	is.False(subset, "Graph g should not be a subset of graph h due to missing vertex 4")
+}
 
-		// Create directed graph g with vertices {1, 2, 3} and edges (1,2), (2,3)
-		g, _ := simple.New(graph.IntHash, graph.Directed())
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to g should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to g should not fail")
-		err = g.AddVertexWithOptions(3)
-		is.NoError(err, "Adding vertex 3 to g should not fail")
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to g should not fail")
-		err = g.AddEdgeWithOptions(2, 3)
-		is.NoError(err, "Adding edge (2,3) to g should not fail")
+func TestIsSubsetMissingEdge(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-		// Create directed graph h with vertices {1, 2, 3} and edge (1,2)
-		h, _ := simple.New(graph.IntHash, graph.Directed())
-		err = h.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to h should not fail")
-		err = h.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to h should not fail")
-		err = h.AddVertexWithOptions(3)
-		is.NoError(err, "Adding vertex 3 to h should not fail")
-		err = h.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to h should not fail")
+	g, _ := simple.New(graph.IntHash, graph.Directed())
+	h, _ := simple.New(graph.IntHash, graph.Directed())
 
-		// Check if g is a subset of h
-		subset, err := IsSubset(g, h)
-		is.NoError(err, "IsSubset should not return an error")
-		is.False(subset, "Interface g should not be a subset of graph h due to missing edge (2,3)")
-	})
+	is.NoError(g.AddVertexWithOptions(1))
+	is.NoError(g.AddVertexWithOptions(2))
+	is.NoError(g.AddVertexWithOptions(3))
+	is.NoError(g.AddEdgeWithOptions(1, 2))
+	is.NoError(g.AddEdgeWithOptions(2, 3))
 
-	t.Run("Empty Interface as Subset", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	is.NoError(h.AddVertexWithOptions(1))
+	is.NoError(h.AddVertexWithOptions(2))
+	is.NoError(h.AddVertexWithOptions(3))
+	is.NoError(h.AddEdgeWithOptions(1, 2))
 
-		// Create an empty directed graph g
-		g, _ := simple.New(graph.IntHash, graph.Directed())
+	subset, err := IsSubset(g, h)
+	is.NoError(err)
+	is.False(subset, "Graph g should not be a subset of graph h due to missing edge (2,3)")
+}
 
-		// Create any directed graph h with vertices and edges
-		h, _ := simple.New(graph.IntHash, graph.Directed())
-		err := h.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to h should not fail")
-		err = h.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to h should not fail")
-		err = h.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to h should not fail")
+func TestIsSubsetEmptyGraph(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-		// Check if empty g is a subset of h
-		subset, err := IsSubset(g, h)
-		is.NoError(err, "IsSubset should not return an error")
-		is.True(subset, "Empty graph g should be a subset of any graph h")
-	})
+	g, _ := simple.New(graph.IntHash, graph.Directed())
+	h, _ := simple.New(graph.IntHash, graph.Directed())
 
-	t.Run("Identical Graphs", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	is.NoError(h.AddVertexWithOptions(1))
+	is.NoError(h.AddVertexWithOptions(2))
+	is.NoError(h.AddEdgeWithOptions(1, 2))
 
-		// Create undirected graph g with vertices {1, 2, 3} and edges (1,2), (2,3), (3,1)
-		g, _ := simple.New(graph.IntHash) // undirected by default
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to g should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to g should not fail")
-		err = g.AddVertexWithOptions(3)
-		is.NoError(err, "Adding vertex 3 to g should not fail")
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to g should not fail")
-		err = g.AddEdgeWithOptions(2, 3)
-		is.NoError(err, "Adding edge (2,3) to g should not fail")
-		err = g.AddEdgeWithOptions(3, 1)
-		is.NoError(err, "Adding edge (3,1) to g should not fail")
+	subset, err := IsSubset(g, h)
+	is.NoError(err)
+	is.True(subset, "An empty graph should be a subset of any graph")
+}
 
-		// Create identical undirected graph h
-		h, _ := simple.New(graph.IntHash) // undirected by default
-		err = h.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to h should not fail")
-		err = h.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to h should not fail")
-		err = h.AddVertexWithOptions(3)
-		is.NoError(err, "Adding vertex 3 to h should not fail")
-		err = h.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to h should not fail")
-		err = h.AddEdgeWithOptions(2, 3)
-		is.NoError(err, "Adding edge (2,3) to h should not fail")
-		err = h.AddEdgeWithOptions(3, 1)
-		is.NoError(err, "Adding edge (3,1) to h should not fail")
+func TestIsSubsetIdenticalGraphs(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-		// Check if g is a subset of h
-		subset, err := IsSubset(g, h)
-		is.NoError(err, "IsSubset should not return an error")
-		is.True(subset, "Interface g should be a subset of graph h as they are identical")
-	})
+	g, _ := simple.New(graph.IntHash)
+	h, _ := simple.New(graph.IntHash)
 
-	t.Run("Different Traits", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	for _, vertex := range []int{1, 2, 3} {
+		is.NoError(g.AddVertexWithOptions(vertex))
+		is.NoError(h.AddVertexWithOptions(vertex))
+	}
 
-		// Create undirected graph g with vertices {1, 2} and edge (1,2)
-		g, _ := simple.New(graph.IntHash) // undirected by default
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to g should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to g should not fail")
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to g should not fail")
+	for _, edge := range [][2]int{{1, 2}, {2, 3}, {3, 1}} {
+		is.NoError(g.AddEdgeWithOptions(edge[0], edge[1]))
+		is.NoError(h.AddEdgeWithOptions(edge[0], edge[1]))
+	}
 
-		// Create directed graph h with vertices {1, 2} and edge (1,2)
-		h, _ := simple.New(graph.IntHash, graph.Directed())
-		err = h.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to h should not fail")
-		err = h.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to h should not fail")
-		err = h.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to h should not fail")
+	subset, err := IsSubset(g, h)
+	is.NoError(err)
+	is.True(subset, "Identical graphs should be subsets of each other")
+}
 
-		// Check if g is a subset of h
-		subset, err := IsSubset(g, h)
-		is.ErrorIs(err, graph.ErrGraphTypeMismatch, "IsSubset should return ErrGraphTypeMismatch due to different traits")
-		is.False(subset, "Interface g should not be a subset of graph h due to different traits")
-	})
+func TestIsSubsetDifferentTraits(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-	t.Run("Directed Graphs Subset", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	g, _ := simple.New(graph.IntHash)
+	h, _ := simple.New(graph.IntHash, graph.Directed())
 
-		// Create directed graph g with vertices {1, 2} and edge (1,2)
-		g, _ := simple.New(graph.IntHash, graph.Directed())
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to g should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to g should not fail")
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to g should not fail")
+	is.NoError(g.AddVertexWithOptions(1))
+	is.NoError(g.AddVertexWithOptions(2))
+	is.NoError(g.AddEdgeWithOptions(1, 2))
 
-		// Create directed graph h with vertices {1, 2, 3} and edges (1,2), (2,3)
-		h, _ := simple.New(graph.IntHash, graph.Directed())
-		err = h.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to h should not fail")
-		err = h.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to h should not fail")
-		err = h.AddVertexWithOptions(3)
-		is.NoError(err, "Adding vertex 3 to h should not fail")
-		err = h.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to h should not fail")
-		err = h.AddEdgeWithOptions(2, 3)
-		is.NoError(err, "Adding edge (2,3) to h should not fail")
+	is.NoError(h.AddVertexWithOptions(1))
+	is.NoError(h.AddVertexWithOptions(2))
+	is.NoError(h.AddEdgeWithOptions(1, 2))
 
-		// Check if g is a subset of h
-		subset, err := IsSubset(g, h)
-		is.NoError(err, "IsSubset should not return an error")
-		is.True(subset, "Directed graph g should be a subset of graph h")
-	})
+	subset, err := IsSubset(g, h)
+	is.ErrorIs(err, graph.ErrGraphTypeMismatch)
+	is.False(subset, "Graphs with different traits should not be subsets")
+}
 
-	t.Run("undirected Graphs Subset", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+func TestIsSubsetNoCommonVertices(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-		// Create undirected graph g with vertices {1, 2} and edge (1,2)
-		g, _ := simple.New(graph.IntHash) // undirected by default
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to g should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to g should not fail")
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to g should not fail")
+	g, _ := simple.New(graph.IntHash, graph.Directed())
+	h, _ := simple.New(graph.IntHash, graph.Directed())
 
-		// Create undirected graph h with vertices {1, 2, 3} and edges (1,2), (2,3)
-		h, _ := simple.New(graph.IntHash) // undirected by default
-		err = h.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to h should not fail")
-		err = h.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to h should not fail")
-		err = h.AddVertexWithOptions(3)
-		is.NoError(err, "Adding vertex 3 to h should not fail")
-		err = h.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to h should not fail")
-		err = h.AddEdgeWithOptions(2, 3)
-		is.NoError(err, "Adding edge (2,3) to h should not fail")
+	is.NoError(g.AddVertexWithOptions(1))
+	is.NoError(g.AddVertexWithOptions(2))
+	is.NoError(g.AddEdgeWithOptions(1, 2))
 
-		// Check if g is a subset of h
-		subset, err := IsSubset(g, h)
-		is.NoError(err, "IsSubset should not return an error")
-		is.True(subset, "undirected graph g should be a subset of graph h")
-	})
+	is.NoError(h.AddVertexWithOptions(3))
+	is.NoError(h.AddVertexWithOptions(4))
+	is.NoError(h.AddEdgeWithOptions(3, 4))
 
-	t.Run("No Common Vertices", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	subset, err := IsSubset(g, h)
+	is.NoError(err)
+	is.False(subset, "Graphs with no common vertices should not be subsets")
+}
 
-		// Create directed graph g with vertices {1, 2} and edge (1,2)
-		g, _ := simple.New(graph.IntHash, graph.Directed())
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to g should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to g should not fail")
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to g should not fail")
+func TestIsSubsetExtraEdgesInH(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-		// Create directed graph h with vertices {3, 4} and edge (3,4)
-		h, _ := simple.New(graph.IntHash, graph.Directed())
-		err = h.AddVertexWithOptions(3)
-		is.NoError(err, "Adding vertex 3 to h should not fail")
-		err = h.AddVertexWithOptions(4)
-		is.NoError(err, "Adding vertex 4 to h should not fail")
-		err = h.AddEdgeWithOptions(3, 4)
-		is.NoError(err, "Adding edge (3,4) to h should not fail")
+	g, _ := simple.New(graph.IntHash, graph.Directed())
+	h, _ := simple.New(graph.IntHash, graph.Directed())
 
-		// Check if g is a subset of h
-		subset, err := IsSubset(g, h)
-		is.NoError(err, "IsSubset should not return an error")
-		is.False(subset, "Interface g should not be a subset of graph h as there are no common vertices")
-	})
+	is.NoError(g.AddVertexWithOptions(1))
+	is.NoError(g.AddVertexWithOptions(2))
+	is.NoError(g.AddEdgeWithOptions(1, 2))
 
-	t.Run("g is not a subset - Extra Edge in h", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	is.NoError(h.AddVertexWithOptions(1))
+	is.NoError(h.AddVertexWithOptions(2))
+	is.NoError(h.AddEdgeWithOptions(1, 2))
+	is.NoError(h.AddEdgeWithOptions(2, 1))
 
-		// Create directed graph g with vertices {1, 2} and edge (1,2)
-		g, _ := simple.New(graph.IntHash, graph.Directed())
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to g should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to g should not fail")
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to g should not fail")
+	subset, err := IsSubset(g, h)
+	is.NoError(err)
+	is.True(subset, "Graph g should be a subset of graph h even if h has extra edges")
+}
 
-		// Create directed graph h with vertices {1, 2} and edges (1,2), (2,1)
-		h, _ := simple.New(graph.IntHash, graph.Directed())
-		err = h.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to h should not fail")
-		err = h.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to h should not fail")
-		err = h.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to h should not fail")
-		err = h.AddEdgeWithOptions(2, 1)
-		is.NoError(err, "Adding edge (2,1) to h should not fail")
+func TestIsSubsetEdgeNotInH(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-		// Check if g is a subset of h
-		subset, err := IsSubset(g, h)
-		is.NoError(err, "IsSubset should not return an error")
-		is.True(subset, "Interface g should be a subset of graph h even if h has extra edges")
-	})
+	g, _ := simple.New(graph.IntHash, graph.Directed())
+	h, _ := simple.New(graph.IntHash, graph.Directed())
 
-	t.Run("g has an edge not in h", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	is.NoError(g.AddVertexWithOptions(1))
+	is.NoError(g.AddVertexWithOptions(2))
+	is.NoError(g.AddVertexWithOptions(3))
+	is.NoError(g.AddEdgeWithOptions(1, 2))
+	is.NoError(g.AddEdgeWithOptions(2, 3))
 
-		// Create directed graph g with vertices {1, 2, 3} and edges (1,2), (2,3)
-		g, _ := simple.New(graph.IntHash, graph.Directed())
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to g should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to g should not fail")
-		err = g.AddVertexWithOptions(3)
-		is.NoError(err, "Adding vertex 3 to g should not fail")
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to g should not fail")
-		err = g.AddEdgeWithOptions(2, 3)
-		is.NoError(err, "Adding edge (2,3) to g should not fail")
+	is.NoError(h.AddVertexWithOptions(1))
+	is.NoError(h.AddVertexWithOptions(2))
+	is.NoError(h.AddVertexWithOptions(3))
+	is.NoError(h.AddEdgeWithOptions(1, 2))
 
-		// Create directed graph h with vertices {1, 2, 3} and only edge (1,2)
-		h, _ := simple.New(graph.IntHash, graph.Directed())
-		err = h.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to h should not fail")
-		err = h.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to h should not fail")
-		err = h.AddVertexWithOptions(3)
-		is.NoError(err, "Adding vertex 3 to h should not fail")
-		err = h.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to h should not fail")
-
-		// Check if g is a subset of h
-		subset, err := IsSubset(g, h)
-		is.NoError(err, "IsSubset should not return an error")
-		is.False(subset, "Interface g should not be a subset of graph h because h is missing edge (2,3)")
-	})
+	subset, err := IsSubset(g, h)
+	is.NoError(err)
+	is.False(subset, "Graph g should not be a subset of graph h because h is missing edge (2,3)")
 }

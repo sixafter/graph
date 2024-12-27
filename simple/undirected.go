@@ -260,26 +260,25 @@ func (u *undirected[K, T]) Edges() ([]graph.Edge[K], error) {
 }
 
 func (u *undirected[K, T]) SetEdgeWithOptions(source, target K, options ...graph.EdgeOption) error {
-	existingEdge, err := u.store.FindEdge(source, target)
+	edge, err := u.store.FindEdge(source, target)
 	if err != nil {
 		return err
 	}
 
 	for _, option := range options {
-		ep := existingEdge.Properties()
-		p, ok := ep.(*EdgeProperties) // Attempt to assert the type
+		p, ok := edge.Properties().(*EdgeProperties) // Attempt to assert the type
 		if !ok {
-			return fmt.Errorf("failed to modify edge: %T", ep)
+			return fmt.Errorf("failed to modify edge: %T", edge.Properties())
 		}
 
 		option(p)
 	}
 
-	if err = u.store.ModifyEdge(source, target, existingEdge); err != nil {
+	if err = u.store.ModifyEdge(source, target, edge); err != nil {
 		return err
 	}
 
-	reversedEdge := NewEdge(target, source, existingEdge.Properties())
+	reversedEdge := NewEdge(target, source, edge.Properties())
 
 	return u.store.ModifyEdge(target, source, reversedEdge)
 }

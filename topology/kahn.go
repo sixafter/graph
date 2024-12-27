@@ -90,7 +90,10 @@ func TopologicalSort[K graph.Ordered, T any](g graph.Interface[K, T]) ([]K, erro
 	return order, nil
 }
 
-// TopologicalSortDeterministic performs a deterministic topological sort on a directed graph.
+// TopologicalSortDeterministic performs a deterministic topological sort on a directed graph
+// and is an enhanced version of Kahn's algorithm that guarantees a deterministic topological
+// order by adding a sorting mechanism.
+//
 // The function ensures that the resulting order is consistent across executions by applying
 // a custom comparison function (`less`) to resolve ties between vertices.
 //

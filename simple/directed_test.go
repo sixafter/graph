@@ -14,331 +14,124 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestDirectedGraph(t *testing.T) {
+func TestAddVertex_Directed(t *testing.T) {
 	t.Parallel()
+	is := assert.New(t)
 
-	t.Run("AddVertex", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	g, _ := New(graph.StringHash, graph.Directed(), graph.Acyclic(), graph.PreventCycles())
+	err := g.AddVertexWithOptions("A", VertexWeight(5), VertexItem("label", "VertexA"))
+	is.NoError(err, "Adding vertex should not fail")
 
-		g, _ := New(graph.StringHash, graph.Directed(), graph.Acyclic(), graph.PreventCycles())
-		err := g.AddVertexWithOptions("A", VertexWeight(5), VertexItem("label", "VertexA"))
-		is.NoError(err, "Adding vertex should not fail")
+	vertex, err := g.Vertex("A")
+	is.NoError(err, "Fetching vertex should not fail")
+	is.Equal("A", vertex.Value(), "Vertex should match the added value")
+}
 
-		vertex, err := g.Vertex("A")
-		is.NoError(err, "Fetching vertex should not fail")
-		is.Equal("A", vertex.Value(), "Vertex should match the added value")
-	})
+func TestAddVerticesFrom_Directed(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-	t.Run("AddVerticesFrom", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	source, _ := New(graph.StringHash, graph.Directed(), graph.Acyclic(), graph.PreventCycles())
+	is.NoError(source.AddVertexWithOptions("A"))
+	is.NoError(source.AddVertexWithOptions("B"))
 
-		source, _ := New(graph.StringHash, graph.Directed(), graph.Acyclic(), graph.PreventCycles())
-		err := source.AddVertexWithOptions("A")
-		is.NoError(err, "Adding vertex A should not fail")
-		err = source.AddVertexWithOptions("B")
-		is.NoError(err, "Adding vertex B should not fail")
+	target, _ := New(graph.StringHash, graph.Directed(), graph.Acyclic(), graph.PreventCycles())
+	is.NoError(target.AddVerticesFrom(source))
 
-		target, _ := New(graph.StringHash, graph.Directed(), graph.Acyclic(), graph.PreventCycles())
-		err = target.AddVerticesFrom(source)
-		is.NoError(err, "Adding vertices from another graph should not fail")
+	order, err := target.Order()
+	is.NoError(err, "Fetching graph order should not fail")
+	is.Equal(2, order, "Target graph should contain the same number of vertices as the source")
+}
 
-		order, err := target.Order()
-		is.NoError(err, "Fetching graph order should not fail")
-		is.Equal(2, order, "Interface should contain the same number of vertices as the source")
-	})
+func TestAddEdge_Directed(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-	t.Run("AddEdge", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	g, _ := New(graph.StringHash, graph.Directed(), graph.Acyclic(), graph.PreventCycles())
+	is.NoError(g.AddVertexWithOptions("A"))
+	is.NoError(g.AddVertexWithOptions("B"))
 
-		g, _ := New(graph.StringHash, graph.Directed(), graph.Acyclic(), graph.PreventCycles())
-		err := g.AddVertexWithOptions("A")
-		err = g.AddVertexWithOptions("B")
+	e := NewEdgeWithOptions("A", "B", EdgeWeight(3))
+	is.NoError(g.AddEdge(e), "Adding edge should not fail")
 
-		e := NewEdgeWithOptions("A", "B", EdgeWeight(3))
-		err = g.AddEdge(e)
-		is.NoError(err, "Adding edge should not fail")
+	edge, err := g.Edge("A", "B")
+	is.NoError(err, "Fetching edge should not fail")
+	is.Equal("A", edge.Source(), "Edge source should match")
+	is.Equal("B", edge.Target(), "Edge target should match")
+	is.Equal(float64(3), edge.Properties().Weight(), "Edge weight should match")
+}
 
-		edge, err := g.Edge("A", "B")
-		is.NoError(err, "Fetching edge should not fail")
-		is.Equal("A", edge.Source(), "Edge source should match")
-		is.Equal("B", edge.Target(), "Edge target should match")
-		is.Equal(float64(3), edge.Properties().Weight(), "Edge weight should match")
-	})
+func TestAddEdgesFrom_Directed(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-	t.Run("AddEdgesFrom", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	source, _ := New(graph.StringHash, graph.Directed(), graph.Acyclic(), graph.PreventCycles())
+	is.NoError(source.AddVertexWithOptions("A"))
+	is.NoError(source.AddVertexWithOptions("B"))
+	is.NoError(source.AddEdge(NewEdgeWithOptions("A", "B")))
 
-		source, _ := New(graph.StringHash, graph.Directed(), graph.Acyclic(), graph.PreventCycles())
-		err := source.AddVertexWithOptions("A")
-		is.NoError(err, "Adding vertex A should not fail")
-		err = source.AddVertexWithOptions("B")
-		is.NoError(err, "Adding vertex B should not fail")
-		e := NewEdgeWithOptions("A", "B")
-		err = source.AddEdge(e)
-		is.NoError(err, "Adding edge A -> B should not fail")
+	target, _ := New(graph.StringHash, graph.Directed(), graph.Acyclic(), graph.PreventCycles())
+	is.NoError(target.AddVertexWithOptions("A"))
+	is.NoError(target.AddVertexWithOptions("B"))
+	is.NoError(target.AddEdgesFrom(source))
 
-		target, _ := New(graph.StringHash, graph.Directed(), graph.Acyclic(), graph.PreventCycles())
-		err = target.AddVertexWithOptions("A")
-		is.NoError(err, "Adding vertex A should not fail")
-		err = target.AddVertexWithOptions("B")
-		is.NoError(err, "Adding vertex B should not fail")
+	size, err := target.Size()
+	is.NoError(err, "Fetching graph size should not fail")
+	is.Equal(1, size, "Target graph should contain the same number of edges as the source")
+}
 
-		err = target.AddEdgesFrom(source)
-		is.NoError(err, "Adding edges from another graph should not fail")
+func TestRemoveVertex_Directed(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-		size, err := target.Size()
-		is.NoError(err, "Fetching graph size should not fail")
-		is.Equal(1, size, "Interface should contain the same number of edges as the source")
-	})
+	g, _ := New(graph.StringHash, graph.Directed(), graph.Acyclic(), graph.PreventCycles())
+	is.NoError(g.AddVertexWithOptions("A"))
+	is.NoError(g.RemoveVertex("A"))
 
-	t.Run("RemoveVertex", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	_, err := g.Vertex("A")
+	is.Error(err, "Fetching removed vertex should fail")
+}
 
-		g, _ := New(graph.StringHash, graph.Directed(), graph.Acyclic(), graph.PreventCycles())
-		err := g.AddVertexWithOptions("A")
-		is.NoError(err, "Adding vertex should not fail")
+func TestRemoveEdge_Directed(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-		err = g.RemoveVertex("A")
-		is.NoError(err, "Removing vertex should not fail")
+	g, _ := New(graph.StringHash, graph.Directed(), graph.Acyclic(), graph.PreventCycles())
+	is.NoError(g.AddVertexWithOptions("A"))
+	is.NoError(g.AddVertexWithOptions("B"))
+	is.NoError(g.AddEdge(NewEdgeWithOptions("A", "B")))
+	is.NoError(g.RemoveEdge("A", "B"))
 
-		_, err = g.Vertex("A")
-		is.Error(err, "Fetching removed vertex should fail")
-	})
+	_, err := g.Edge("A", "B")
+	is.Error(err, "Fetching removed edge should fail")
+}
 
-	t.Run("RemoveEdge", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+func TestAdjacencyMap_Directed(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-		g, _ := New(graph.StringHash, graph.Directed(), graph.Acyclic(), graph.PreventCycles())
-		err := g.AddVertexWithOptions("A")
-		is.NoError(err, "Adding vertex A should not fail")
-		err = g.AddVertexWithOptions("B")
-		is.NoError(err, "Adding vertex B should not fail")
-		e := NewEdgeWithOptions("A", "B")
-		err = g.AddEdge(e)
-		is.NoError(err, "Adding edge A -> B should not fail")
+	g, _ := New(graph.StringHash, graph.Directed(), graph.Acyclic(), graph.PreventCycles())
+	is.NoError(g.AddVertexWithOptions("A"))
+	is.NoError(g.AddVertexWithOptions("B"))
+	is.NoError(g.AddEdge(NewEdgeWithOptions("A", "B")))
 
-		err = g.RemoveEdge("A", "B")
-		is.NoError(err, "Removing edge should not fail")
+	adjMap, err := g.AdjacencyMap()
+	is.NoError(err, "Fetching adjacency map should not fail")
+	is.Contains(adjMap["A"], "B", "Adjacency map should contain the edge A -> B")
+}
 
-		_, err = g.Edge("A", "B")
-		is.Error(err, "Fetching removed edge should fail")
-	})
+func TestPredecessorMap_Directed(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-	t.Run("AdjacencyMap", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	g, _ := New(graph.StringHash, graph.Directed(), graph.Acyclic(), graph.PreventCycles())
+	is.NoError(g.AddVertexWithOptions("A"))
+	is.NoError(g.AddVertexWithOptions("B"))
+	is.NoError(g.AddEdge(NewEdgeWithOptions("A", "B")))
 
-		g, _ := New(graph.StringHash, graph.Directed(), graph.Acyclic(), graph.PreventCycles())
-		err := g.AddVertexWithOptions("A")
-		is.NoError(err, "Adding vertex A should not fail")
-		err = g.AddVertexWithOptions("B")
-		is.NoError(err, "Adding vertex B should not fail")
-		e := NewEdgeWithOptions("A", "B")
-		err = g.AddEdge(e)
-		is.NoError(err, "Adding edge A -> B should not fail")
-
-		adjMap, err := g.AdjacencyMap()
-		is.NoError(err, "Fetching adjacency map should not fail")
-		is.Contains(adjMap["A"], "B", "Adjacency map should contain the edge A -> B")
-	})
-
-	t.Run("PredecessorMap", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
-
-		g, _ := New(graph.StringHash, graph.Directed(), graph.Acyclic(), graph.PreventCycles())
-		err := g.AddVertexWithOptions("A")
-		is.NoError(err, "Adding vertex A should not fail")
-		err = g.AddVertexWithOptions("B")
-		is.NoError(err, "Adding vertex B should not fail")
-		e := NewEdgeWithOptions("A", "B")
-		err = g.AddEdge(e)
-		is.NoError(err, "Adding edge A -> B should not fail")
-
-		predMap, err := g.PredecessorMap()
-		is.NoError(err, "Fetching predecessor map should not fail")
-		is.Contains(predMap["B"], "A", "Predecessor map should contain the edge A -> B")
-	})
-
-	t.Run("Clone", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
-
-		g, _ := New(graph.StringHash, graph.Directed(), graph.Acyclic(), graph.PreventCycles())
-		err := g.AddVertexWithOptions("A")
-		is.NoError(err, "Adding vertex A should not fail")
-		err = g.AddVertexWithOptions("B")
-		is.NoError(err, "Adding vertex B should not fail")
-		e := NewEdgeWithOptions("A", "B")
-		err = g.AddEdge(e)
-		is.NoError(err, "Adding edge A -> B should not fail")
-
-		clone, err := g.Clone()
-		is.NoError(err, "Cloning graph should not fail")
-
-		adjMap, err := clone.AdjacencyMap()
-		is.NoError(err, "Fetching adjacency map of clone should not fail")
-		is.Contains(adjMap["A"], "B", "Cloned graph should contain the edge A -> B")
-	})
-
-	t.Run("HasEdge", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
-
-		// Create a directed graph
-		g, _ := New(graph.StringHash, graph.Directed(), graph.Acyclic(), graph.PreventCycles())
-
-		// Add vertices and edges
-		is.NoError(g.AddVertexWithOptions("A"))
-		is.NoError(g.AddVertexWithOptions("B"))
-		is.NoError(g.AddVertexWithOptions("C"))
-		e := NewEdgeWithOptions("A", "B")
-		is.NoError(g.AddEdge(e)) // A -> B
-		e = NewEdgeWithOptions("B", "C")
-		is.NoError(g.AddEdge(e)) // B -> C
-
-		// Check for existing edges
-		hasEdge, err := g.HasEdge("A", "B")
-		is.NoError(err)
-		is.True(hasEdge, "Edge A -> B should exist")
-
-		hasEdge, err = g.HasEdge("B", "C")
-		is.NoError(err)
-		is.True(hasEdge, "Edge B -> C should exist")
-
-		// Check for non-existent edges
-		hasEdge, err = g.HasEdge("B", "A")
-		is.NoError(err)
-		is.False(hasEdge, "Edge B -> A should not exist")
-
-		hasEdge, err = g.HasEdge("C", "A")
-		is.NoError(err)
-		is.False(hasEdge, "Edge C -> A should not exist")
-
-		// Check for non-existent vertices
-		hasEdge, err = g.HasEdge("D", "E")
-		is.NoError(err)
-		is.False(hasEdge, "Edge D -> E should not exist")
-	})
-
-	t.Run("HasVertex", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
-
-		g, _ := New[string, string](graph.StringHash, graph.Directed(), graph.Acyclic(), graph.PreventCycles())
-
-		// Add some vertices
-		is.NoError(g.AddVertexWithOptions("A"))
-		is.NoError(g.AddVertexWithOptions("B"))
-
-		exists, err := g.HasVertex("A")
-		is.NoError(err)
-		is.True(exists, "Vertex A should exist in the graph")
-
-		exists, err = g.HasVertex("C")
-		is.NoError(err)
-		is.False(exists, "Vertex C should not exist in the graph")
-	})
-
-	t.Run("Degree", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
-
-		g, _ := New(graph.StringHash, graph.Directed(), graph.Acyclic(), graph.PreventCycles())
-
-		is.NoError(g.AddVertexWithOptions("A"))
-		is.NoError(g.AddVertexWithOptions("B"))
-		is.NoError(g.AddVertexWithOptions("C"))
-		e := NewEdgeWithOptions("A", "B")
-		is.NoError(g.AddEdge(e)) // A -> B
-		e = NewEdgeWithOptions("C", "A")
-		is.NoError(g.AddEdge(e)) // C -> A
-
-		degree, err := g.Degree("A")
-		is.NoError(err, "Degree should not fail")
-		is.Equal(2, degree, "Degree of A should be 2 (1 in + 1 out)")
-	})
-
-	t.Run("InDegree", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
-
-		g, _ := New(graph.StringHash, graph.Directed(), graph.Acyclic(), graph.PreventCycles())
-		is.NoError(g.AddVertexWithOptions("A"))
-		is.NoError(g.AddVertexWithOptions("B"))
-		is.NoError(g.AddVertexWithOptions("C"))
-		e := NewEdgeWithOptions("B", "A")
-		is.NoError(g.AddEdge(e)) // B -> A
-		e = NewEdgeWithOptions("C", "A")
-		is.NoError(g.AddEdge(e)) // C -> A
-
-		inDegree, err := g.InDegree("A")
-		is.NoError(err, "InDegree should not fail")
-		is.Equal(2, inDegree, "InDegree of A should be 2")
-	})
-
-	t.Run("OutDegree", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
-
-		g, _ := New(graph.StringHash, graph.Directed(), graph.Acyclic(), graph.PreventCycles())
-		is.NoError(g.AddVertexWithOptions("A"))
-		is.NoError(g.AddVertexWithOptions("B"))
-		is.NoError(g.AddVertexWithOptions("C"))
-		e := NewEdgeWithOptions("A", "B")
-		is.NoError(g.AddEdge(e)) // A -> B
-		e = NewEdgeWithOptions("A", "C")
-		is.NoError(g.AddEdge(e)) // A -> C
-
-		outDegree, err := g.OutDegree("A")
-		is.NoError(err, "OutDegree should not fail")
-		is.Equal(2, outDegree, "OutDegree of A should be 2")
-	})
-
-	t.Run("Neighbors", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
-
-		g, _ := New(graph.StringHash, graph.Directed(), graph.Acyclic(), graph.PreventCycles())
-		is.NoError(g.AddVertexWithOptions("A"))
-		is.NoError(g.AddVertexWithOptions("B"))
-		is.NoError(g.AddVertexWithOptions("C"))
-		e := NewEdgeWithOptions("A", "B")
-		is.NoError(g.AddEdge(e)) // A -> B
-		e = NewEdgeWithOptions("A", "C")
-		is.NoError(g.AddEdge(e)) // A -> C
-
-		neighbors, err := g.Neighbors("A")
-		is.NoError(err, "Neighbors should not fail")
-		is.ElementsMatch([]graph.Vertex[string, string]{
-			NewVertexWithOptions(graph.StringHash("B"), "B"),
-			NewVertexWithOptions(graph.StringHash("C"), "C"),
-		}, neighbors, "Neighbors of A should be B and C")
-	})
-
-	t.Run("Vertices", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
-
-		g, _ := New(graph.StringHash, graph.Directed(), graph.Acyclic(), graph.PreventCycles())
-		is.NoError(g.AddVertexWithOptions("A"))
-		is.NoError(g.AddVertexWithOptions("B"))
-		is.NoError(g.AddVertexWithOptions("C"))
-
-		vertices, err := g.Vertices()
-		is.NoError(err, "Vertices should not fail")
-		is.ElementsMatch([]graph.Vertex[string, string]{
-			NewVertexWithOptions(graph.StringHash("A"), "A"),
-			NewVertexWithOptions(graph.StringHash("B"), "B"),
-			NewVertexWithOptions(graph.StringHash("C"), "C"),
-		}, vertices, "Vertices should include A, B, and C")
-	})
+	predMap, err := g.PredecessorMap()
+	is.NoError(err, "Fetching predecessor map should not fail")
+	is.Contains(predMap["B"], "A", "Predecessor map should contain the edge A -> B")
 }
 
 func TestStreamEdgesWithContext_Directed(t *testing.T) {

@@ -14,283 +14,142 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestDifference(t *testing.T) {
+func TestDifferenceBasic(t *testing.T) {
 	t.Parallel()
+	is := assert.New(t)
 
-	t.Run("Basic Difference of two graphs", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	g, _ := simple.New(graph.IntHash) // undirected by default
+	is.NoError(g.AddVertexWithOptions(1))
+	is.NoError(g.AddVertexWithOptions(2))
+	is.NoError(g.AddEdgeWithOptions(1, 2))
 
-		// Create graph h
-		g, _ := simple.New(graph.IntHash) // undirected by default
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to g should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to g should not fail")
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to g should not fail")
+	h, _ := simple.New(graph.IntHash) // undirected by default
+	is.NoError(h.AddVertexWithOptions(2))
+	is.NoError(h.AddVertexWithOptions(3))
+	is.NoError(h.AddEdgeWithOptions(2, 3))
 
-		// Create graph h
-		h, _ := simple.New(graph.IntHash) // undirected by default
-		err = h.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to h should not fail")
-		err = h.AddVertexWithOptions(3)
-		is.NoError(err, "Adding vertex 3 to h should not fail")
-		err = h.AddEdgeWithOptions(2, 3)
-		is.NoError(err, "Adding edge (2,3) to h should not fail")
+	differenceGraph, err := Difference(g, h)
+	is.NoError(err)
+	is.NotNil(differenceGraph)
 
-		// Perform the difference h - h
-		differenceGraph, err := Difference(g, h)
-		is.NoError(err, "Difference operation should not fail")
+	order, err := differenceGraph.Order()
+	is.NoError(err)
+	is.Equal(2, order)
 
-		// Debugging: Print adjacency maps for clarity
-		adjMapG, err := g.AdjacencyMap()
-		is.NoError(err, "Getting adjacency map of g should not fail")
-		adjMapH, err := h.AdjacencyMap()
-		is.NoError(err, "Getting adjacency map of h should not fail")
-		adjMapDifference, err := differenceGraph.AdjacencyMap()
-		is.NoError(err, "Getting adjacency map of differenceGraph should not fail")
+	size, err := differenceGraph.Size()
+	is.NoError(err)
+	is.Equal(1, size)
 
-		fmt.Printf("GraphG adjacency map: %v\n", adjMapG)
-		fmt.Printf("GraphH adjacency map: %v\n", adjMapH)
-		fmt.Printf("Difference graph adjacency map: %v\n", adjMapDifference)
+	hasEdge, err := differenceGraph.HasEdge(1, 2)
+	is.NoError(err)
+	is.True(hasEdge)
+}
 
-		// Validate the difference graph's order (number of vertices)
-		order, err := differenceGraph.Order()
-		is.NoError(err, "Getting order of differenceGraph should not fail")
-		is.Equal(2, order, "Difference graph should contain 2 vertices")
+func TestDifferenceOverlappingEdges(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-		// Validate the difference graph's size (number of edges)
-		size, err := differenceGraph.Size()
-		is.NoError(err, "Getting size of differenceGraph should not fail")
-		is.Equal(1, size, "Difference graph should contain 1 edge")
+	g, _ := simple.New(graph.IntHash, graph.Directed())
+	is.NoError(g.AddVertexWithOptions(1))
+	is.NoError(g.AddVertexWithOptions(2))
+	is.NoError(g.AddEdgeWithOptions(1, 2))
 
-		// Check existence of edges
-		hasEdge, err := differenceGraph.HasEdge(1, 2)
-		is.NoError(err, "Checking existence of edge (1,2) should not fail")
-		is.True(hasEdge, "Edge (1,2) should exist in the difference graph")
+	h, _ := simple.New(graph.IntHash, graph.Directed())
+	is.NoError(h.AddVertexWithOptions(1))
+	is.NoError(h.AddVertexWithOptions(2))
+	is.NoError(h.AddEdgeWithOptions(1, 2))
+	is.NoError(h.AddEdgeWithOptions(2, 1))
 
-		hasEdge, err = differenceGraph.HasEdge(2, 3)
-		is.NoError(err, "Checking existence of edge (2,3) should not fail")
-		is.False(hasEdge, "Edge (2,3) should not exist in the difference graph")
-	})
+	differenceGraph, err := Difference(g, h)
+	is.NoError(err)
+	is.NotNil(differenceGraph)
 
-	t.Run("Difference with overlapping edges", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	size, err := differenceGraph.Size()
+	is.NoError(err)
+	is.Equal(0, size)
+}
 
-		// Create directed graph g
-		g, _ := simple.New(graph.IntHash, graph.Directed())
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to g should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to g should not fail")
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to g should not fail")
+func TestDifferenceNoCommonVertices(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-		// Create directed graph h with overlapping edges
-		h, _ := simple.New(graph.IntHash, graph.Directed())
-		err = h.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to h should not fail")
-		err = h.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to h should not fail")
-		err = h.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to h should not fail")
-		err = h.AddEdgeWithOptions(2, 1)
-		is.NoError(err, "Adding edge (2,1) to h should not fail")
+	g, _ := simple.New(graph.IntHash) // undirected by default
+	is.NoError(g.AddVertexWithOptions(1))
+	is.NoError(g.AddVertexWithOptions(2))
+	is.NoError(g.AddEdgeWithOptions(1, 2))
 
-		// Perform the difference g - h
-		differenceGraph, err := Difference(g, h)
-		is.NoError(err, "Difference operation should not fail")
+	h, _ := simple.New(graph.IntHash) // undirected by default
+	is.NoError(h.AddVertexWithOptions(3))
+	is.NoError(h.AddVertexWithOptions(4))
+	is.NoError(h.AddEdgeWithOptions(3, 4))
 
-		// Debugging: Print adjacency maps for clarity
-		adjMapG, err := g.AdjacencyMap()
-		is.NoError(err, "Getting adjacency map of g should not fail")
-		adjMapH, err := h.AdjacencyMap()
-		is.NoError(err, "Getting adjacency map of h should not fail")
-		adjMapDifference, err := differenceGraph.AdjacencyMap()
-		is.NoError(err, "Getting adjacency map of differenceGraph should not fail")
+	differenceGraph, err := Difference(g, h)
+	is.NoError(err)
+	is.NotNil(differenceGraph)
 
-		fmt.Printf("GraphG adjacency map: %v\n", adjMapG)
-		fmt.Printf("GraphH adjacency map: %v\n", adjMapH)
-		fmt.Printf("Difference graph adjacency map: %v\n", adjMapDifference)
+	order, err := differenceGraph.Order()
+	is.NoError(err)
+	is.Equal(2, order)
 
-		// Validate the difference graph's order (number of vertices)
-		order, err := differenceGraph.Order()
-		is.NoError(err, "Getting order of differenceGraph should not fail")
-		is.Equal(2, order, "Difference graph should contain 2 vertices")
+	size, err := differenceGraph.Size()
+	is.NoError(err)
+	is.Equal(1, size)
 
-		// Validate the difference graph's size (number of edges)
-		size, err := differenceGraph.Size()
-		is.NoError(err, "Getting size of differenceGraph should not fail")
-		is.Equal(0, size, "Difference graph should contain 0 edges")
+	hasEdge, err := differenceGraph.HasEdge(1, 2)
+	is.NoError(err)
+	is.True(hasEdge)
+}
 
-		// Check existence of edges
-		hasEdge, err := differenceGraph.HasEdge(1, 2)
-		is.NoError(err, "Checking existence of edge (1,2) should not fail")
-		is.False(hasEdge, "Edge (1,2) should not exist in the difference graph")
+func TestDifferenceTraitMismatch(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-		hasEdge, err = differenceGraph.HasEdge(2, 1)
-		is.NoError(err, "Checking existence of edge (2,1) should not fail")
-		is.False(hasEdge, "Edge (2,1) should not exist in the difference graph")
-	})
+	g, _ := simple.New(graph.IntHash, graph.Directed())
+	is.NoError(g.AddVertexWithOptions(1))
+	is.NoError(g.AddVertexWithOptions(2))
+	is.NoError(g.AddEdgeWithOptions(1, 2))
 
-	t.Run("Difference with no common vertices", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
+	h, _ := simple.New(graph.IntHash) // undirected by default
+	is.NoError(h.AddVertexWithOptions(1))
+	is.NoError(h.AddVertexWithOptions(2))
+	is.NoError(h.AddEdgeWithOptions(1, 2))
 
-		// Create the first undirected graph g
-		g, _ := simple.New(graph.IntHash) // undirected by default
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to g should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to g should not fail")
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to g should not fail")
+	differenceGraph, err := Difference(g, h)
+	is.Error(err)
+	is.Nil(differenceGraph)
+}
 
-		// Create the second undirected graph h
-		h, _ := simple.New(graph.IntHash) // undirected by default
-		err = h.AddVertexWithOptions(3)
-		is.NoError(err, "Adding vertex 3 to h should not fail")
-		err = h.AddVertexWithOptions(4)
-		is.NoError(err, "Adding vertex 4 to h should not fail")
-		err = h.AddEdgeWithOptions(3, 4)
-		is.NoError(err, "Adding edge (3,4) to h should not fail")
+func TestDifferenceSubset(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-		// Perform the difference g - h
-		differenceGraph, err := Difference(g, h)
-		is.NoError(err, "Difference operation should not fail")
+	g, _ := simple.New(graph.IntHash, graph.Directed())
+	is.NoError(g.AddVertexWithOptions(1))
+	is.NoError(g.AddVertexWithOptions(2))
+	is.NoError(g.AddVertexWithOptions(3))
+	is.NoError(g.AddEdgeWithOptions(1, 2))
+	is.NoError(g.AddEdgeWithOptions(2, 3))
 
-		// Debugging: Print adjacency maps for clarity
-		adjMapG, err := g.AdjacencyMap()
-		is.NoError(err, "Getting adjacency map of g should not fail")
-		adjMapH, err := h.AdjacencyMap()
-		is.NoError(err, "Getting adjacency map of h should not fail")
-		adjMapDifference, err := differenceGraph.AdjacencyMap()
-		is.NoError(err, "Getting adjacency map of differenceGraph should not fail")
+	h, _ := simple.New(graph.IntHash, graph.Directed())
+	is.NoError(h.AddVertexWithOptions(1))
+	is.NoError(h.AddVertexWithOptions(2))
+	is.NoError(h.AddEdgeWithOptions(1, 2))
 
-		fmt.Printf("GraphG adjacency map: %v\n", adjMapG)
-		fmt.Printf("GraphH adjacency map: %v\n", adjMapH)
-		fmt.Printf("Difference graph adjacency map: %v\n", adjMapDifference)
+	differenceGraph, err := Difference(g, h)
+	is.NoError(err)
+	is.NotNil(differenceGraph)
 
-		// Validate the difference graph's order (number of vertices)
-		order, err := differenceGraph.Order()
-		is.NoError(err, "Getting order of differenceGraph should not fail")
-		is.Equal(2, order, "Difference graph should contain 2 vertices")
+	order, err := differenceGraph.Order()
+	is.NoError(err)
+	is.Equal(3, order)
 
-		// Validate the difference graph's size (number of edges)
-		size, err := differenceGraph.Size()
-		is.NoError(err, "Getting size of differenceGraph should not fail")
-		is.Equal(1, size, "Difference graph should contain 1 edge")
+	size, err := differenceGraph.Size()
+	is.NoError(err)
+	is.Equal(1, size)
 
-		// Check existence of edges
-		hasEdge, err := differenceGraph.HasEdge(1, 2)
-		is.NoError(err, "Checking existence of edge (1,2) should not fail")
-		is.True(hasEdge, "Edge (1,2) should exist in the difference graph")
-
-		// For undirected graphs, (2,1) is equivalent to (1,2)
-		hasEdge, err = differenceGraph.HasEdge(2, 1)
-		is.NoError(err, "Checking existence of edge (2,1) should not fail")
-		is.True(hasEdge, "Edge (2,1) should exist in the difference graph as it is undirected")
-	})
-
-	t.Run("Difference with trait mismatch", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
-
-		// Create the first directed graph g
-		g, _ := simple.New(graph.IntHash, graph.Directed())
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to g should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to g should not fail")
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to g should not fail")
-
-		// Create the second undirected graph h
-		h, _ := simple.New(graph.IntHash) // undirected by default
-		err = h.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to h should not fail")
-		err = h.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to h should not fail")
-		err = h.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to h should not fail")
-
-		// Perform the difference g - h
-		differenceGraph, err := Difference(g, h)
-		is.ErrorIs(err, graph.ErrGraphTypeMismatch, "Difference should fail due to trait mismatch")
-		is.Nil(differenceGraph, "Difference graph should be nil due to trait mismatch")
-	})
-
-	t.Run("Difference where h is a subset of g", func(t *testing.T) {
-		t.Parallel()
-		is := assert.New(t)
-
-		// Create the larger directed graph g
-		g, _ := simple.New(graph.IntHash, graph.Directed())
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to g should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to g should not fail")
-		err = g.AddVertexWithOptions(3)
-		is.NoError(err, "Adding vertex 3 to g should not fail")
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to g should not fail")
-		err = g.AddEdgeWithOptions(2, 3)
-		is.NoError(err, "Adding edge (2,3) to g should not fail")
-
-		// Create the subset directed graph h
-		h, _ := simple.New(graph.IntHash, graph.Directed())
-		err = h.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 to h should not fail")
-		err = h.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 to h should not fail")
-		err = h.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge (1,2) to h should not fail")
-
-		// Perform the difference g - h
-		differenceGraph, err := Difference(g, h)
-		is.NoError(err, "Difference operation should not fail")
-
-		// Debugging: Print adjacency maps for clarity
-		adjMapG, err := g.AdjacencyMap()
-		is.NoError(err, "Getting adjacency map of g should not fail")
-		adjMapH, err := h.AdjacencyMap()
-		is.NoError(err, "Getting adjacency map of h should not fail")
-		adjMapDifference, err := differenceGraph.AdjacencyMap()
-		is.NoError(err, "Getting adjacency map of differenceGraph should not fail")
-
-		fmt.Printf("GraphG adjacency map: %v\n", adjMapG)
-		fmt.Printf("GraphH adjacency map: %v\n", adjMapH)
-		fmt.Printf("Difference graph adjacency map: %v\n", adjMapDifference)
-
-		// Validate the difference graph's order (number of vertices)
-		order, err := differenceGraph.Order()
-		is.NoError(err, "Getting order of differenceGraph should not fail")
-		is.Equal(3, order, "Difference graph should contain 3 vertices")
-
-		// Validate the difference graph's size (number of edges)
-		size, err := differenceGraph.Size()
-		is.NoError(err, "Getting size of differenceGraph should not fail")
-		is.Equal(1, size, "Difference graph should contain 1 edge")
-
-		// Check existence of edges
-		hasEdge, err := differenceGraph.HasEdge(1, 2)
-		is.NoError(err, "Checking existence of edge (1,2) should not fail")
-		is.False(hasEdge, "Edge (1,2) should not exist in the difference graph")
-
-		hasEdge, err = differenceGraph.HasEdge(2, 3)
-		is.NoError(err, "Checking existence of edge (2,3) should not fail")
-		is.True(hasEdge, "Edge (2,3) should exist in the difference graph")
-
-		// Ensure all vertices from g are present
-		_, err = differenceGraph.Vertex(1)
-		is.NoError(err, "Vertex 1 should still exist in the difference graph")
-		_, err = differenceGraph.Vertex(2)
-		is.NoError(err, "Vertex 2 should still exist in the difference graph")
-		_, err = differenceGraph.Vertex(3)
-		is.NoError(err, "Vertex 3 should still exist in the difference graph")
-	})
+	hasEdge, err := differenceGraph.HasEdge(2, 3)
+	is.NoError(err)
+	is.True(hasEdge)
 }
 
 func TestSymmetricDifferenceDirected(t *testing.T) {

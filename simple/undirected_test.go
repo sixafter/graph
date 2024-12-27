@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestAddVertex(t *testing.T) {
+func TestAddVertex_Undirected(t *testing.T) {
 	t.Parallel()
 	is := assert.New(t)
 
@@ -27,7 +27,7 @@ func TestAddVertex(t *testing.T) {
 	is.Equal("A", vertex.ID(), "Vertex should match the added value")
 }
 
-func TestAddVerticesFrom(t *testing.T) {
+func TestAddVerticesFrom_Undirected(t *testing.T) {
 	t.Parallel()
 	is := assert.New(t)
 
@@ -44,7 +44,7 @@ func TestAddVerticesFrom(t *testing.T) {
 	is.Equal(2, order, "Interface should contain the same number of vertices as the source")
 }
 
-func TestAddEdge(t *testing.T) {
+func TestAddEdge_Undirected(t *testing.T) {
 	t.Parallel()
 	is := assert.New(t)
 
@@ -67,7 +67,7 @@ func TestAddEdge(t *testing.T) {
 	is.Equal("B", reverseEdge.Source(), "Reverse edge source should match original target")
 }
 
-func TestAddEdgesFrom(t *testing.T) {
+func TestAddEdgesFrom_Undirected(t *testing.T) {
 	t.Parallel()
 	is := assert.New(t)
 
@@ -88,7 +88,7 @@ func TestAddEdgesFrom(t *testing.T) {
 	is.Equal(1, size, "Interface should contain the same number of unique edges as the source")
 }
 
-func TestRemoveVertex(t *testing.T) {
+func TestRemoveVertex_Undirected(t *testing.T) {
 	t.Parallel()
 	is := assert.New(t)
 
@@ -102,7 +102,7 @@ func TestRemoveVertex(t *testing.T) {
 	is.Error(err, "Fetching removed vertex should fail")
 }
 
-func TestRemoveEdge(t *testing.T) {
+func TestRemoveEdge_Undirected(t *testing.T) {
 	t.Parallel()
 	is := assert.New(t)
 
@@ -119,7 +119,7 @@ func TestRemoveEdge(t *testing.T) {
 	is.False(hasEdge, "Edge A -- B should no longer exist")
 }
 
-func TestAdjacencyMap(t *testing.T) {
+func TestAdjacencyMap_Undirected(t *testing.T) {
 	t.Parallel()
 	is := assert.New(t)
 
@@ -134,7 +134,7 @@ func TestAdjacencyMap(t *testing.T) {
 	is.Contains(adjMap["B"], "A", "Adjacency map should contain the edge B -> A for undirected graph")
 }
 
-func TestPredecessorMap(t *testing.T) {
+func TestPredecessorMap_Undirected(t *testing.T) {
 	t.Parallel()
 	is := assert.New(t)
 
@@ -149,7 +149,7 @@ func TestPredecessorMap(t *testing.T) {
 	is.Contains(predMap["A"], "B", "Predecessor map should contain the edge B -> A for undirected graph")
 }
 
-func TestCloneGraph(t *testing.T) {
+func TestCloneGraph_Undirected(t *testing.T) {
 	t.Parallel()
 	is := assert.New(t)
 
@@ -167,7 +167,7 @@ func TestCloneGraph(t *testing.T) {
 	is.Contains(adjMap["B"], "A", "Cloned graph should contain the reverse edge B -> A for undirected graph")
 }
 
-func TestHasEdges(t *testing.T) {
+func TestHasEdges_Undirected(t *testing.T) {
 	t.Parallel()
 	is := assert.New(t)
 
@@ -185,7 +185,7 @@ func TestHasEdges(t *testing.T) {
 	is.True(hasEdge, "Edge A -- B should exist")
 }
 
-func TestHasVertex(t *testing.T) {
+func TestHasVertex_Undirected(t *testing.T) {
 	t.Parallel()
 	is := assert.New(t)
 

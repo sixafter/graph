@@ -13,82 +13,72 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestTransitiveReduction(t *testing.T) {
+func TestTransitiveReduction_RemoveRedundantEdges(t *testing.T) {
 	t.Parallel()
 	is := assert.New(t)
 
-	t.Run("Remove Redundant Edges", func(t *testing.T) {
-		t.Parallel()
-		g, _ := simple.New(graph.IntHash, graph.Directed(), graph.Acyclic())
+	g, _ := simple.New(graph.IntHash, graph.Directed(), graph.Acyclic())
 
-		// Add vertices first
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 should not fail")
-		err = g.AddVertexWithOptions(3)
-		is.NoError(err, "Adding vertex 3 should not fail")
+	// Add vertices
+	is.NoError(g.AddVertexWithOptions(1), "Adding vertex 1 should not fail")
+	is.NoError(g.AddVertexWithOptions(2), "Adding vertex 2 should not fail")
+	is.NoError(g.AddVertexWithOptions(3), "Adding vertex 3 should not fail")
 
-		// Add edges
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge 1->2 should not fail")
-		err = g.AddEdgeWithOptions(2, 3)
-		is.NoError(err, "Adding edge 2->3 should not fail")
-		err = g.AddEdgeWithOptions(1, 3) // Redundant edge
-		is.NoError(err, "Adding edge 1->3 should not fail")
+	// Add edges
+	is.NoError(g.AddEdgeWithOptions(1, 2), "Adding edge 1->2 should not fail")
+	is.NoError(g.AddEdgeWithOptions(2, 3), "Adding edge 2->3 should not fail")
+	is.NoError(g.AddEdgeWithOptions(1, 3), "Adding redundant edge 1->3 should not fail")
 
-		reduced, err := TransitiveReduction(g)
-		is.NoError(err)
+	// Perform transitive reduction
+	reduced, err := TransitiveReduction(g)
+	is.NoError(err, "Transitive reduction should not fail")
 
-		edges, err := reduced.Edges()
-		is.NoError(err)
+	// Check resulting edges
+	edges, err := reduced.Edges()
+	is.NoError(err, "Fetching edges should not fail")
 
-		expectedEdges := []graph.Edge[int]{
-			simple.NewEdgeWithOptions(1, 2),
-			simple.NewEdgeWithOptions(2, 3),
-		}
-		is.ElementsMatch(expectedEdges, edges, "Redundant edge (1 -> 3) should be removed")
-	})
+	expectedEdges := []graph.Edge[int]{
+		simple.NewEdgeWithOptions(1, 2),
+		simple.NewEdgeWithOptions(2, 3),
+	}
+	is.ElementsMatch(expectedEdges, edges, "Redundant edge (1 -> 3) should be removed")
+}
 
-	t.Run("Interface with Cycles", func(t *testing.T) {
-		t.Parallel()
-		g, _ := simple.New(graph.IntHash, graph.Directed())
+func TestTransitiveReduction_WithCycles(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-		// Add vertices first
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 should not fail")
-		err = g.AddVertexWithOptions(3)
-		is.NoError(err, "Adding vertex 3 should not fail")
+	g, _ := simple.New(graph.IntHash, graph.Directed())
 
-		// Add edges to form a cycle
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge 1->2 should not fail")
-		err = g.AddEdgeWithOptions(2, 3)
-		is.NoError(err, "Adding edge 2->3 should not fail")
-		err = g.AddEdgeWithOptions(3, 1)
-		is.NoError(err, "Adding edge 3->1 should not fail")
+	// Add vertices
+	is.NoError(g.AddVertexWithOptions(1), "Adding vertex 1 should not fail")
+	is.NoError(g.AddVertexWithOptions(2), "Adding vertex 2 should not fail")
+	is.NoError(g.AddVertexWithOptions(3), "Adding vertex 3 should not fail")
 
-		_, err = TransitiveReduction(g)
-		is.ErrorIs(err, graph.ErrCyclicGraph, "Should return ErrCyclicGraph for graphs with cycles")
-	})
+	// Add edges to form a cycle
+	is.NoError(g.AddEdgeWithOptions(1, 2), "Adding edge 1->2 should not fail")
+	is.NoError(g.AddEdgeWithOptions(2, 3), "Adding edge 2->3 should not fail")
+	is.NoError(g.AddEdgeWithOptions(3, 1), "Adding edge 3->1 should not fail")
 
-	t.Run("undirected Interface", func(t *testing.T) {
-		t.Parallel()
-		g, _ := simple.New(graph.IntHash) // undirected by default
+	// Perform transitive reduction and expect failure
+	_, err := TransitiveReduction(g)
+	is.ErrorIs(err, graph.ErrCyclicGraph, "Should return ErrCyclicGraph for graphs with cycles")
+}
 
-		// Add vertices
-		err := g.AddVertexWithOptions(1)
-		is.NoError(err, "Adding vertex 1 should not fail")
-		err = g.AddVertexWithOptions(2)
-		is.NoError(err, "Adding vertex 2 should not fail")
+func TestTransitiveReduction_UndirectedGraph(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
 
-		// Add edge
-		err = g.AddEdgeWithOptions(1, 2)
-		is.NoError(err, "Adding edge 1->2 should not fail")
+	g, _ := simple.New(graph.IntHash) // undirected by default
 
-		_, err = TransitiveReduction(g)
-		is.ErrorIs(err, graph.ErrUndirectedGraph, "Should return ErrUndirectedGraph for undirected graphs")
-	})
+	// Add vertices
+	is.NoError(g.AddVertexWithOptions(1), "Adding vertex 1 should not fail")
+	is.NoError(g.AddVertexWithOptions(2), "Adding vertex 2 should not fail")
+
+	// Add edge
+	is.NoError(g.AddEdgeWithOptions(1, 2), "Adding edge 1->2 should not fail")
+
+	// Perform transitive reduction and expect failure
+	_, err := TransitiveReduction(g)
+	is.ErrorIs(err, graph.ErrUndirectedGraph, "Should return ErrUndirectedGraph for undirected graphs")
 }
