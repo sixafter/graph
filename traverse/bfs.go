@@ -7,6 +7,7 @@ package traverse
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/sixafter/graph"
 )
@@ -106,14 +107,22 @@ func BFSWithDepthTracking[K graph.Ordered, T any](g graph.Interface[K, T], start
 			return nil
 		}
 
-		// Iterate over all adjacent vertices of the current vertex.
-		for adjacency := range adjacencyMap[current.vertex] {
-			// If the adjacent vertex has not been visited, mark it as visited.
-			if !visited[adjacency] {
-				visited[adjacency] = true
-				// Add the adjacent vertex to the queue with an incremented depth.
-				q = append(q, queueNode{vertex: adjacency, depth: current.depth + 1})
+		// Gather and sort neighbors for deterministic processing.
+		neighbors := make([]K, 0)
+		for neighbor := range adjacencyMap[current.vertex] {
+			if !visited[neighbor] {
+				neighbors = append(neighbors, neighbor)
 			}
+		}
+		// Sort neighbors to ensure deterministic order.
+		sort.Slice(neighbors, func(i, j int) bool {
+			return neighbors[i] < neighbors[j]
+		})
+
+		// Add sorted neighbors to the queue.
+		for _, neighbor := range neighbors {
+			visited[neighbor] = true
+			q = append(q, queueNode{vertex: neighbor, depth: current.depth + 1})
 		}
 	}
 
