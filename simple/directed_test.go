@@ -201,3 +201,64 @@ func TestStreamVerticesWithContext_Directed(t *testing.T) {
 	sort.Strings(ids)
 	is.ElementsMatch([]string{"A", "B"}, ids, "Streamed vertices should have correct IDs")
 }
+
+func TestSetVertexWithOptions_Directed(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	g, _ := New[string, string](graph.StringHash, graph.Directed())
+	is.NoError(g.AddVertexWithOptions("A", VertexWeight(5), VertexItem("label", "VertexA")))
+
+	exists, err := g.HasVertex("A")
+	is.NoError(err)
+	is.True(exists)
+
+	is.NoError(g.SetVertexWithOptions("A", VertexWeight(10), VertexItem("label", "UpdatedVertexA")))
+	vertex, err := g.Vertex("A")
+	is.NoError(err)
+
+	is.Equal(float64(10), vertex.Properties().Weight(), "Vertex weight should be updated")
+	is.Equal("UpdatedVertexA", vertex.Properties().Items()["label"], "Vertex label should be updated")
+}
+
+func TestSetEdgeWithOptions_Directed(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	g, _ := New[string, string](graph.StringHash, graph.Directed())
+	is.NoError(g.AddVertexWithOptions("A"))
+	is.NoError(g.AddVertexWithOptions("B"))
+	is.NoError(g.AddEdgeWithOptions("A", "B", EdgeWeight(5)))
+
+	is.NoError(g.SetEdgeWithOptions("A", "B", EdgeWeight(10)))
+	edge, err := g.Edge("A", "B")
+	is.NoError(err)
+
+	is.Equal(float64(10), edge.Properties().Weight(), "Edge weight should be updated")
+}
+
+func TestNeighbors_Directed(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	// Create a directed graph
+	g, _ := New(graph.StringHash, graph.Directed(), graph.Acyclic(), graph.PreventCycles())
+	is.NoError(g.AddVertexWithOptions("A"))
+	is.NoError(g.AddVertexWithOptions("B"))
+	is.NoError(g.AddVertexWithOptions("C"))
+	is.NoError(g.AddEdge(NewEdgeWithOptions("A", "B")))
+	is.NoError(g.AddEdge(NewEdgeWithOptions("A", "C")))
+
+	// Fetch neighbors of "A"
+	neighbors, err := g.Neighbors("A")
+	is.NoError(err, "Fetching neighbors should not fail")
+
+	// Extract IDs from the returned vertices
+	var neighborIDs []string
+	for _, neighbor := range neighbors {
+		neighborIDs = append(neighborIDs, neighbor.ID())
+	}
+
+	// Assert the neighbor IDs
+	is.ElementsMatch([]string{"B", "C"}, neighborIDs, "Neighbors should match")
+}
