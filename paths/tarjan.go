@@ -15,12 +15,12 @@ import (
 
 // Tarjan identifies all Strongly Connected Components (SCCs) in a directed graph.
 //
-// In formal graph-theoretic terms, let G = (V, E) be a directed graph where V is the set of vertices
-// and E is the set of edges. A Strongly Connected Component S ⊆ V is a maximal subset of vertices
+// In formal graph-theoretic terms, let G = (Items, E) be a directed graph where Items is the set of vertices
+// and E is the set of edges. A Strongly Connected Component S ⊆ Items is a maximal subset of vertices
 // such that for every pair of vertices u, v ∈ S, there is a directed path from u to v and a directed
 // path from v to u. SCCs thus represent subgraphs where connectivity is mutual.
 //
-// This function uses Tarjan’s algorithm, a well-known linear-time procedure (O(|V| + |E|)) for finding SCCs.
+// This function uses Tarjan’s algorithm, a well-known linear-time procedure (O(|Items| + |E|)) for finding SCCs.
 // Tarjan’s algorithm performs a single depth-first search (DFS) to compute a unique "discovery index"
 // (or timestamp) for each vertex. It also maintains a "low-link" value that tracks the smallest
 // discovery index of any vertex reachable from a given vertex, including itself and via back edges.
@@ -112,8 +112,8 @@ type sccState[K comparable] struct {
 //   - K: The type of the hash used to uniquely identify vertices (must be comparable).
 //
 // Complexity:
-//   - Time Complexity: O(V + E), where V is the number of vertices and E is the number of edges.
-//   - Space Complexity: O(V) for the Stack and auxiliary maps.
+//   - Time Complexity: O(Items + E), where Items is the number of vertices and E is the number of edges.
+//   - Space Complexity: O(Items) for the Stack and auxiliary maps.
 //
 // This function is designed to be used as part of a larger SCC computation process,
 // typically initiated with a full traversal over all vertices in the graph.

@@ -69,7 +69,7 @@ func BFS[K graph.Ordered, T any](g graph.Interface[K, T], start K, visit func(K)
 // - Returns an error if the adjacency map cannot be retrieved.
 // - Returns an error if the start vertex is not found in the graph.
 //
-// Complexity: O(V + E), where V is the number of vertices and E is the number of edges.
+// Complexity: O(Items + E), where Items is the number of vertices and E is the number of edges.
 func BFSWithDepthTracking[K graph.Ordered, T any](g graph.Interface[K, T], start K, visit func(K, int) bool) error {
 	// Retrieve the adjacency map of the graph.
 	adjacencyMap, err := g.AdjacencyMap()

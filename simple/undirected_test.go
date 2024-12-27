@@ -265,3 +265,19 @@ func TestStreamVerticesWithContext_Undirected(t *testing.T) {
 	sort.Strings(ids)
 	is.ElementsMatch([]string{"A", "B"}, ids, "Streamed vertices should have correct IDs")
 }
+
+func TestUndirected_SetVertexWithOptions(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	g, _ := New[string, string](graph.StringHash)
+	is.NoError(g.AddVertexWithOptions("A", VertexWeight(5), VertexItem("label", "VertexA")))
+
+	is.NoError(g.SetVertexWithOptions("A", VertexWeight(10), VertexItem("label", "UpdatedVertexA")))
+	vertex, err := g.Vertex("A")
+	is.NoError(err)
+
+	is.Equal(float64(10), vertex.Properties().Weight(), "Vertex weight should be updated")
+	is.Equal("UpdatedVertexA", vertex.Properties().Items()["label"], "Vertex label should be updated")
+
+}

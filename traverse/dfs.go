@@ -24,7 +24,7 @@ import (
 // Returns:
 // - An error if the adjacency map cannot be retrieved or if the starting vertex is not found.
 //
-// Complexity: O(V + E), where V is the number of vertices and E is the number of edges.
+// Complexity: O(Items + E), where Items is the number of vertices and E is the number of edges.
 //
 // DFS is non-recursive and maintains a Stack instead.
 func DFS[K graph.Ordered, T any](g graph.Interface[K, T], start K, visit func(K) bool) error {

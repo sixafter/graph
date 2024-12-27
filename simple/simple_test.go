@@ -197,11 +197,11 @@ func TestGraphWithAttributes(t *testing.T) {
 
 	// Retrieve and verify vertex attributes
 	vp, _ := g.Vertex("A")
-	is.Equal("red", vp.Properties().V()["color"])
+	is.Equal("red", vp.Properties().Items()["color"])
 
 	// Retrieve and verify edge attributes
 	edgeAB, _ := g.Edge("A", "B")
-	is.Equal(10, edgeAB.Properties().V()["weight"])
+	is.Equal(10, edgeAB.Properties().Items()["weight"])
 }
 
 func TestGraphOperations(t *testing.T) {
@@ -354,12 +354,12 @@ func TestEdgeOptions(t *testing.T) {
 		option := EdgeItems(attributes)
 		option(props)
 
-		is.Equal(attributes, props.V(), "Edge attributes should match the input map")
+		is.Equal(attributes, props.Items(), "Edge attributes should match the input map")
 
 		option = EdgeItem("color", "red")
 		option(props)
 
-		is.Equal("red", props.V()["color"], "Edge attribute 'color' should be 'red'")
+		is.Equal("red", props.Items()["color"], "Edge attribute 'color' should be 'red'")
 
 	})
 
@@ -399,12 +399,12 @@ func TestVertexOptions(t *testing.T) {
 		option := VertexItems(attributes)
 		option(props)
 
-		is.Equal(attributes, props.V(), "Vertex attributes should match the input map")
+		is.Equal(attributes, props.Items(), "Vertex attributes should match the input map")
 
 		option = VertexItem("name", "nodeA")
 		option(props)
 
-		is.Equal("nodeA", props.V()["name"], "Vertex attribute 'name' should be 'nodeA'")
+		is.Equal("nodeA", props.Items()["name"], "Vertex attribute 'name' should be 'nodeA'")
 
 	})
 }

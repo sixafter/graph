@@ -32,7 +32,7 @@ import (
 //   - [ErrFailedToGetGraphOrder], [ErrFailedToGetAdjacencyMap], or [ErrFailedToGetPredecessorMap] for failures
 //     in retrieving the graph's properties.
 //
-// Complexity: O(V + E), where V is the number of vertices and E is the number of edges.
+// Complexity: O(Items + E), where Items is the number of vertices and E is the number of edges.
 func TopologicalSort[K graph.Ordered, T any](g graph.Interface[K, T]) ([]K, error) {
 	if !g.Traits().IsDirected {
 		return nil, graph.ErrUndirectedGraph
@@ -114,7 +114,7 @@ func TopologicalSort[K graph.Ordered, T any](g graph.Interface[K, T]) ([]K, erro
 //   - The `frontier` is sorted using the `less` function before being added to the processing queue to ensure deterministic ordering.
 //
 // Time Complexity:
-//   - O(V + E) for traversing the graph, where V is the number of vertices and E is the number of edges.
+//   - O(Items + E) for traversing the graph, where Items is the number of vertices and E is the number of edges.
 //   - Additional cost for sorting the `frontier` in each iteration, which depends on the graph structure and the `less` function.
 //
 // Example Usage:

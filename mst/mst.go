@@ -161,7 +161,7 @@ type UnionFind[K graph.Ordered] struct {
 // Returns:
 //   - A pointer to a new `UnionFindunionFind` instance.
 //
-// Complexity: O(V), where V is the number of vertices.
+// Complexity: O(Items), where Items is the number of vertices.
 //
 // Example:
 //
@@ -201,7 +201,7 @@ func (u *UnionFind[K]) Add(vertex K) {
 //   - vertex1: A vertex in the first set to merge.
 //   - vertex2: A vertex in the second set to merge.
 //
-// Complexity: O(α(V)), where α is the inverse Ackermann function, effectively constant.
+// Complexity: O(α(Items)), where α is the inverse Ackermann function, effectively constant.
 //
 // Example:
 //

@@ -51,10 +51,10 @@ func TestMemoryStorage(t *testing.T) {
 		is.NoError(err)
 		is.Equal("A", vertex)
 		is.Equal(float64(5), props.Weight())
-		is.Equal("vertexA", props.V()["label"])
-		is.Equal(true, props.V()["active"])
-		is.Equal(10, props.V()["count"])
-		is.Equal(3.14, props.V()["decimal"])
+		is.Equal("vertexA", props.Items()["label"])
+		is.Equal(true, props.Items()["active"])
+		is.Equal(10, props.Items()["count"])
+		is.Equal(3.14, props.Items()["decimal"])
 
 		// Modify vertex properties
 		v = NewVertexWithOptions(1, "A", VertexItems(map[string]any{
@@ -67,8 +67,8 @@ func TestMemoryStorage(t *testing.T) {
 		_, updatedProps, err := s.FindVertex(1)
 		is.NoError(err)
 		is.Equal(float64(20), updatedProps.Weight())
-		is.Equal("updatedA", updatedProps.V()["label"])
-		is.Equal(true, updatedProps.V()["new"])
+		is.Equal("updatedA", updatedProps.Items()["label"])
+		is.Equal(true, updatedProps.Items()["new"])
 
 		// List vertices
 		vertices, err := s.ListVertices()
@@ -119,10 +119,10 @@ func TestMemoryStorage(t *testing.T) {
 		is.Equal(1, edge.Source())
 		is.Equal(2, edge.Target())
 		is.Equal(float64(2), edge.Properties().Weight())
-		is.Equal("connects", edge.Properties().V()["relation"])
-		is.Equal("one-way", edge.Properties().V()["direction"])
-		is.Equal(7.89, edge.Properties().V()["threshold"])
-		is.Equal(3, edge.Properties().V()["retryCount"])
+		is.Equal("connects", edge.Properties().Items()["relation"])
+		is.Equal("one-way", edge.Properties().Items()["direction"])
+		is.Equal(7.89, edge.Properties().Items()["threshold"])
+		is.Equal(3, edge.Properties().Items()["retryCount"])
 
 		// Modify edge properties
 		e = NewEdgeWithOptions(1, 2, EdgeItems(map[string]any{
@@ -135,8 +135,8 @@ func TestMemoryStorage(t *testing.T) {
 		updatedEdge, err := s.FindEdge(1, 2)
 		is.NoError(err)
 		is.Equal(float64(3), updatedEdge.Properties().Weight())
-		is.Equal("updatedConnects", updatedEdge.Properties().V()["relation"])
-		is.Equal(true, updatedEdge.Properties().V()["urgent"])
+		is.Equal("updatedConnects", updatedEdge.Properties().Items()["relation"])
+		is.Equal(true, updatedEdge.Properties().Items()["urgent"])
 
 		// List all edges
 		edges, err := s.ListEdges()

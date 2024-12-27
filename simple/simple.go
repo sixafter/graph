@@ -200,7 +200,7 @@ func EdgeData(data any) graph.EdgeOption {
 	}
 }
 
-func (e *EdgeProperties) V() map[string]any {
+func (e *EdgeProperties) Items() map[string]any {
 	return e.items
 }
 
@@ -316,7 +316,7 @@ func VertexItems(items map[string]any) graph.VertexOption {
 	}
 }
 
-func (v *VertexProperties) V() map[string]any {
+func (v *VertexProperties) Items() map[string]any {
 	return v.v
 }
 

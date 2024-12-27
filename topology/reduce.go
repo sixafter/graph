@@ -31,7 +31,7 @@ import (
 //   - [ErrFailedToCloneGraph], [ErrFailedToGetGraphOrder], or [ErrFailedToGetAdjacencyMap] for failures
 //     in graph operations.
 //
-// Complexity: O(V * (V + E)), where V is the number of vertices and E is the number of edges.
+// Complexity: O(Items * (Items + E)), where Items is the number of vertices and E is the number of edges.
 // This makes it computationally expensive for large graphs.
 //
 // Example:

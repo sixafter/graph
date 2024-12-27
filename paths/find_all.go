@@ -18,7 +18,7 @@ import (
 // the `start` vertex to the `end` vertex, avoiding cycles in the process.
 //
 // Parameters:
-//   - g: The graph of type `Interface[K, T, V]` in which paths are to be found.
+//   - g: The graph of type `Interface[K, T, Items]` in which paths are to be found.
 //   - start: The starting vertex, identified by its hash of type K.
 //   - end: The ending vertex, identified by its hash of type K.
 //

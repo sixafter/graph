@@ -500,13 +500,13 @@ type Edge[T any] interface {
 //
 //	edgeProps := edge.Properties()
 //	weight := edgeProps.Weight()
-//	customValue := edgeProps.V()["custom"]
+//	customValue := edgeProps.Items()["custom"]
 //	fmt.Printf("Weight: %v, Custom Value: %v\n", weight, customValue)
 type EdgeProperties interface {
 	Cloneable[EdgeProperties]
 
-	// V retrieves key-value pairs associated with the edge.
-	V() map[string]any
+	// Items retrieves key-value pairs associated with the edge.
+	Items() map[string]any
 
 	// Metadata returns custom user-defined information for the edge.
 	Metadata() any
@@ -551,8 +551,8 @@ type Vertex[K comparable, T any] interface {
 //	metadata := vertexProps.Metadata()
 //	fmt.Printf("Weight: %v, Metadata: %v\n", weight, metadata)
 type VertexProperties interface {
-	// V retrieves key-value pairs associated with the vertex.
-	V() map[string]any
+	// Items retrieves key-value pairs associated with the vertex.
+	Items() map[string]any
 
 	// Weight specifies the weight of the vertex. Default is 0 if not explicitly set.
 	Weight() float64
