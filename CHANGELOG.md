@@ -18,7 +18,7 @@ Date format: `YYYY-MM-DD`
 ### Security
 
 ---
-## [0.1.0] - 2024-12-23
+## [0.1.0] - 2024-12-27
 
 ### Added
 - **feature:** Initial commit.
