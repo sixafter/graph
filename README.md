@@ -43,7 +43,7 @@ To install this package, run the following command:
 go get -u github.com/sixafter/graph
 ```
 
-To use the this package in your Go project, import it as follows:
+To use the package in your Go project, import it as follows:
 
 ```go
 import "github.com/sixafter/graph"
