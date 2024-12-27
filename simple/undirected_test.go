@@ -296,3 +296,88 @@ func TestUndirected_SetEdgeWithOptions(t *testing.T) {
 
 	is.Equal(float64(10), edge.Properties().Weight(), "Edge weight should be updated")
 }
+
+func TestNeighbors_Undirected(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	// Create a directed graph
+	g, _ := New(graph.StringHash, graph.Directed())
+	is.NoError(g.AddVertexWithOptions("A"))
+	is.NoError(g.AddVertexWithOptions("B"))
+	is.NoError(g.AddVertexWithOptions("C"))
+	is.NoError(g.AddEdge(NewEdgeWithOptions("A", "B")))
+	is.NoError(g.AddEdge(NewEdgeWithOptions("A", "C")))
+
+	// Fetch neighbors of "A"
+	neighbors, err := g.Neighbors("A")
+	is.NoError(err, "Fetching neighbors should not fail")
+
+	// Extract IDs from the returned vertices
+	var neighborIDs []string
+	for _, neighbor := range neighbors {
+		neighborIDs = append(neighborIDs, neighbor.ID())
+	}
+
+	// Assert the neighbor IDs
+	is.ElementsMatch([]string{"B", "C"}, neighborIDs, "Neighbors should match")
+}
+
+func TestDegree_Undirected(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	// Create an undirected graph
+	g, _ := New(graph.StringHash) // Default is undirected
+	is.NoError(g.AddVertexWithOptions("A"))
+	is.NoError(g.AddVertexWithOptions("B"))
+	is.NoError(g.AddVertexWithOptions("C"))
+	is.NoError(g.AddEdge(NewEdgeWithOptions("A", "B")))
+	is.NoError(g.AddEdge(NewEdgeWithOptions("A", "C")))
+
+	// Test degree of vertex "A" (2 edges connected)
+	degree, err := g.Degree("A")
+	is.NoError(err, "Fetching degree should not fail")
+	is.Equal(2, degree, "Degree of vertex A should be 2")
+
+	// Test degree of vertex "B" (1 edge connected)
+	degree, err = g.Degree("B")
+	is.NoError(err, "Fetching degree should not fail")
+	is.Equal(1, degree, "Degree of vertex B should be 1")
+}
+
+func TestOutDegree_Undirected(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	// Create an undirected graph
+	g, _ := New(graph.StringHash) // Default is undirected
+	is.NoError(g.AddVertexWithOptions("A"))
+	is.NoError(g.AddVertexWithOptions("B"))
+	is.NoError(g.AddVertexWithOptions("C"))
+	is.NoError(g.AddEdge(NewEdgeWithOptions("A", "B")))
+	is.NoError(g.AddEdge(NewEdgeWithOptions("A", "C")))
+
+	// Test out-degree of vertex "A" (treated as degree in undirected graph)
+	outDegree, err := g.OutDegree("A")
+	is.NoError(err, "Fetching out-degree should not fail for undirected graph")
+	is.Equal(2, outDegree, "Out-degree of vertex A should be 2 in undirected graph")
+}
+
+func TestInDegree_Undirected(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	// Create an undirected graph
+	g, _ := New(graph.StringHash) // Default is undirected
+	is.NoError(g.AddVertexWithOptions("A"))
+	is.NoError(g.AddVertexWithOptions("B"))
+	is.NoError(g.AddVertexWithOptions("C"))
+	is.NoError(g.AddEdge(NewEdgeWithOptions("A", "B")))
+	is.NoError(g.AddEdge(NewEdgeWithOptions("A", "C")))
+
+	// Test in-degree of vertex "A" (treated as degree in undirected graph)
+	inDegree, err := g.InDegree("A")
+	is.NoError(err, "Fetching in-degree should not fail for undirected graph")
+	is.Equal(2, inDegree, "In-degree of vertex A should be 2 in undirected graph")
+}

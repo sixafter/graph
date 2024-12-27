@@ -262,3 +262,67 @@ func TestNeighbors_Directed(t *testing.T) {
 	// Assert the neighbor IDs
 	is.ElementsMatch([]string{"B", "C"}, neighborIDs, "Neighbors should match")
 }
+
+func TestDegree_Directed(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	// Create a directed graph
+	g, _ := New(graph.StringHash, graph.Directed(), graph.Acyclic(), graph.PreventCycles())
+	is.NoError(g.AddVertexWithOptions("A"))
+	is.NoError(g.AddVertexWithOptions("B"))
+	is.NoError(g.AddVertexWithOptions("C"))
+	is.NoError(g.AddEdge(NewEdgeWithOptions("A", "B")))
+	is.NoError(g.AddEdge(NewEdgeWithOptions("C", "A")))
+
+	// Test degree of vertex "A" (1 in + 1 out)
+	degree, err := g.Degree("A")
+	is.NoError(err, "Fetching degree should not fail")
+	is.Equal(2, degree, "Degree of vertex A should be 2")
+}
+
+func TestOutDegree_Directed(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	// Create a directed graph
+	g, _ := New(graph.StringHash, graph.Directed(), graph.Acyclic(), graph.PreventCycles())
+	is.NoError(g.AddVertexWithOptions("A"))
+	is.NoError(g.AddVertexWithOptions("B"))
+	is.NoError(g.AddVertexWithOptions("C"))
+	is.NoError(g.AddEdge(NewEdgeWithOptions("A", "B")))
+	is.NoError(g.AddEdge(NewEdgeWithOptions("A", "C")))
+
+	// Test out-degree of vertex "A"
+	outDegree, err := g.OutDegree("A")
+	is.NoError(err, "Fetching out-degree should not fail")
+	is.Equal(2, outDegree, "Out-degree of vertex A should be 2")
+
+	// Test out-degree of vertex "B"
+	outDegree, err = g.OutDegree("B")
+	is.NoError(err, "Fetching out-degree should not fail")
+	is.Equal(0, outDegree, "Out-degree of vertex B should be 0")
+}
+
+func TestInDegree_Directed(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	// Create a directed graph
+	g, _ := New(graph.StringHash, graph.Directed(), graph.Acyclic(), graph.PreventCycles())
+	is.NoError(g.AddVertexWithOptions("A"))
+	is.NoError(g.AddVertexWithOptions("B"))
+	is.NoError(g.AddVertexWithOptions("C"))
+	is.NoError(g.AddEdge(NewEdgeWithOptions("A", "B")))
+	is.NoError(g.AddEdge(NewEdgeWithOptions("C", "B")))
+
+	// Test in-degree of vertex "B"
+	inDegree, err := g.InDegree("B")
+	is.NoError(err, "Fetching in-degree should not fail")
+	is.Equal(2, inDegree, "In-degree of vertex B should be 2")
+
+	// Test in-degree of vertex "A"
+	inDegree, err = g.InDegree("A")
+	is.NoError(err, "Fetching in-degree should not fail")
+	is.Equal(0, inDegree, "In-degree of vertex A should be 0")
+}
