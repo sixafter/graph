@@ -14,7 +14,7 @@ import (
 
 func Union[K graph.Ordered, T any](g, h graph.Interface[K, T]) (graph.Interface[K, T], error) {
 	if nil == g || nil == h {
-		return nil, nil
+		return nil, graph.ErrNilInputGraph
 	}
 
 	// Ensure the graphs have the same traits
