@@ -68,7 +68,7 @@ func TransitiveReduction[K graph.Ordered, T any](g graph.Interface[K, T]) (graph
 	// 2. For each direct successor of the current vertex:
 	//    a. Use a Stack-based depth-first search (DFS) to explore all vertices reachable from the successor.
 	//    b. Maintain a `visited` map to track explored vertices and prevent revisiting.
-	//    c. Push the successor onto the Stack and continue DFS until the Stack is empty.
+	//    c. Enqueue the successor onto the Stack and continue DFS until the Stack is empty.
 	//
 	// Inside the DFS loop:
 	// - Check if the current vertex has already been visited to avoid redundant processing.
@@ -77,7 +77,7 @@ func TransitiveReduction[K graph.Ordered, T any](g graph.Interface[K, T]) (graph
 	//      a cycle exists in the graph, and the transitive reduction cannot proceed.
 	//   b. If the adjacency has not been visited and there is a direct edge between the Top-level
 	//      vertex and the adjacency, this edge is redundant and is removed from the graph.
-	//   c. Push the adjacency onto the Stack for further exploration.
+	//   c. Enqueue the adjacency onto the Stack for further exploration.
 	//
 	// This portion of the code ensures that for each vertex, edges that are reachable via
 	// transitive paths are identified and removed, effectively performing the transitive reduction.

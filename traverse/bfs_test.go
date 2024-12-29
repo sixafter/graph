@@ -133,7 +133,6 @@ func TestBFSWithEarlyTermination(t *testing.T) {
 	is.NoError(err)
 	is.Equal([]int{1, 2, 3}, visited, "BFS should stop traversal at vertex 3 after processing all neighbors of vertex 1")
 }
-
 func TestBFSWithDepthTrackingDisconnectedGraph(t *testing.T) {
 	t.Parallel()
 	is := assert.New(t)
@@ -160,13 +159,13 @@ func TestBFSWithDepthTrackingDisconnectedGraph(t *testing.T) {
 
 	is.NoError(err)
 
-	// Verify visited vertices are only in the connected component
+	// Verify visited vertices are only in the connected component with correct depths
 	expectedDepths := map[int]int{
-		1: 1,
-		2: 2,
-		3: 2,
+		1: 0, // Start vertex at depth 0
+		2: 1, // Neighbor at depth 1
+		3: 1, // Neighbor at depth 1
 	}
-	is.Equal(expectedDepths, visited, "BFSWithDepthTracking should only visit the connected component of vertex 1")
+	is.Equal(expectedDepths, visited, "BFSWithDepthTracking should only visit the connected component of vertex 1 with correct depths")
 }
 
 func TestBFSWithNoEdges(t *testing.T) {

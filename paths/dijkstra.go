@@ -51,13 +51,13 @@ func DijkstraFrom[K graph.Ordered, T any](g graph.Interface[K, T], source, targe
 			visited[hash] = false
 		}
 
-		q.Push(hash, weights[hash])
+		q.Enqueue(hash, weights[hash])
 	}
 
 	bestPredecessors := make(map[K]K)
 
 	for q.Len() > 0 {
-		vertex, _ := q.Pop()
+		vertex, _ := q.Dequeue()
 		hasInfiniteWeight := math.IsInf(weights[vertex], 1)
 
 		for adjacency, edge := range adjacencyMap[vertex] {

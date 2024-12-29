@@ -12,24 +12,6 @@ import (
 // Metrics defines methods for calculating various graph metrics.
 // Each method accepts one or more Interface[K, T] instances as parameters.
 type Metrics[K graph.Ordered, T any] interface {
-	// DegreeCentrality calculates the degree centrality for each vertex in the given graph.
-	DegreeCentrality(g graph.Interface[K, T]) (map[K]float64, error)
-
-	// BetweennessCentrality calculates the betweenness centrality for each vertex in the given graph.
-	BetweennessCentrality(g graph.Interface[K, T]) (map[K]float64, error)
-
-	// ClusteringCoefficient calculates the clustering coefficient for each vertex in the given graph.
-	ClusteringCoefficient(g graph.Interface[K, T]) (map[K]float64, error)
-
-	// ClosenessCentrality calculates the closeness centrality for each vertex in the given graph.
-	ClosenessCentrality(g graph.Interface[K, T]) (map[K]float64, error)
-
-	// EigenvectorCentrality calculates the eigenvector centrality for each vertex in the given graph.
-	EigenvectorCentrality(g graph.Interface[K, T]) (map[K]float64, error)
-
-	// PageRank calculates the PageRank for each vertex in the given graph.
-	PageRank(g graph.Interface[K, T], dampingFactor float64, maxIterations int, tol float64) (map[K]float64, error)
-
 	// GlobalClusteringCoefficient calculates the global clustering coefficient of the given graph.
 	GlobalClusteringCoefficient(g graph.Interface[K, T]) (float64, error)
 

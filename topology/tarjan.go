@@ -97,7 +97,7 @@ type sccState[K comparable] struct {
 //     adjacency relationships, and resulting components.
 //
 // Algorithm Steps:
-//  1. Push the current vertex onto the Stack and mark it as visited.
+//  1. Enqueue the current vertex onto the Stack and mark it as visited.
 //  2. Assign the vertex an initial index and lowLink value based on the current DFS timestamp.
 //  3. Explore all adjacent vertices:
 //     - If the adjacent vertex has not been visited, recursively call this function on it.
@@ -105,7 +105,7 @@ type sccState[K comparable] struct {
 //     to reflect the presence of a back edge.
 //  4. After visiting all adjacent vertices, check if the current vertex is the root of an SCC:
 //     - If its lowLink value equals its index, the SCC is identified.
-//     - Pop vertices from the Stack until the current vertex is reached and group them as a component.
+//     - Dequeue vertices from the Stack until the current vertex is reached and group them as a component.
 //  5. Append the identified component to the list of SCCs.
 //
 // Type Parameters:

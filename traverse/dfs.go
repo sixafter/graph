@@ -46,12 +46,12 @@ func DFS[K graph.Ordered, T any](g graph.Interface[K, T], start K, visit func(K)
 	// A map to track which vertices have already been visited.
 	visited := make(map[K]bool)
 
-	// Push the starting vertex onto the stack to begin the traversal.
+	// Enqueue the starting vertex onto the stack to begin the traversal.
 	stack.Push(start)
 
 	// Continue the traversal until the stack is empty.
 	for !stack.IsEmpty() {
-		// Pop the top vertex from the stack to process it.
+		// Dequeue the top vertex from the stack to process it.
 		current, _ := stack.Pop()
 
 		// If the vertex has not been visited, process it.
@@ -65,7 +65,7 @@ func DFS[K graph.Ordered, T any](g graph.Interface[K, T], start K, visit func(K)
 			// Mark the vertex as visited to prevent re-processing.
 			visited[current] = true
 
-			// Push all adjacent vertices of the current vertex onto the stack.
+			// Enqueue all adjacent vertices of the current vertex onto the stack.
 			// These vertices will be processed later.
 			for adjacency := range adjacencyMap[current] {
 				stack.Push(adjacency)
