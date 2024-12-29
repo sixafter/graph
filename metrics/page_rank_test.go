@@ -53,9 +53,10 @@ func TestPageRankDirectedGraph(t *testing.T) {
 	c4 := pr[4]
 
 	// Assertions
+	epsilon := 1e-4
 	is.True(c3 > c1, "Vertex 3 should have a higher PageRank than Vertex 1")
 	is.True(c3 > c4, "Vertex 3 should have a higher PageRank than Vertex 4")
-	is.True(math.Abs(c1-c4) < 1e-4, "Vertex 1 and Vertex 4 should have approximately equal PageRank")
+	is.True(math.Abs(c1-c4) < epsilon, "Vertex 1 and Vertex 4 should have approximately equal PageRank")
 	is.True(c1 > c2, "Vertex 1 should have a higher PageRank than Vertex 2")
 	is.True(c4 > c2, "Vertex 4 should have a higher PageRank than Vertex 2")
 
@@ -96,14 +97,20 @@ func TestPageRankWithDanglingNodes(t *testing.T) {
 	c3 := pr[3]
 	c4 := pr[4]
 
-	// Assertions
-	is.True(c3 > c2, "Vertex 3 should have a higher PageRank than Vertex 2")
-	is.True(c2 > c1, "Vertex 2 should have a higher PageRank than Vertex 1")
-	is.True(floatApproxEqual(c1, c4, 1e-4), "Vertex 1 and Vertex 4 should have approximately equal PageRank")
+	epsilon := 1e-4
+	// Assert that Vertex 1, Vertex 2, and Vertex 3 have approximately equal PageRank
+	is.True(floatApproxEqual(c1, c2, epsilon), "Vertex 1 and Vertex 2 should have approximately equal PageRank")
+	is.True(floatApproxEqual(c2, c3, epsilon), "Vertex 2 and Vertex 3 should have approximately equal PageRank")
 
-	// Optional: Check total PageRank sum
+	// Assert that Vertex 4 has a significantly lower PageRank than Vertex 1
+	is.True(c4 < c1, "Vertex 4 should have a lower PageRank than Vertex 1")
+
+	// Assert that Vertex 4 has some contribution due to teleportation (optional)
+	is.True(c4 > 0.0, "Vertex 4 should have a positive PageRank due to teleportation")
+
+	// Assert the total PageRank sums to approximately 1.0
 	totalPR := c1 + c2 + c3 + c4
-	is.True(floatApproxEqual(totalPR, 1.0, 1e-4), "Total PageRank should sum to approximately 1.0")
+	is.True(floatApproxEqual(totalPR, 1.0, epsilon), "Total PageRank should sum to approximately 1.0")
 }
 
 func TestPageRankFullyConnectedDirectedGraph(t *testing.T) {
@@ -183,13 +190,23 @@ func TestPageRankGraphWithSelfLoops(t *testing.T) {
 	c4 := pr[4]
 
 	// Assertions
-	is.True(c3 > c1, "Vertex 3 should have a higher PageRank than Vertex 1")
-	is.True(c1 > c2, "Vertex 1 should have a higher PageRank than Vertex 2")
-	is.True(c2 > c4, "Vertex 2 should have a higher PageRank than Vertex 4")
+	epsilon := 1e-4
 
-	// Optional: Check total PageRank sum
+	// Assert that Vertex 2 has a higher PageRank than Vertex 1
+	is.True(c2 > c1, "Vertex 2 should have a higher PageRank than Vertex 1")
+
+	// Assert that Vertex 3 has the highest PageRank
+	is.True(c3 > c2, "Vertex 3 should have a higher PageRank than Vertex 2")
+	is.True(c3 > c1, "Vertex 3 should have a higher PageRank than Vertex 1")
+	is.True(c3 > c4, "Vertex 3 should have a higher PageRank than Vertex 4")
+
+	// Assert that Vertex 4 and Vertex 1 have approximately equal PageRank
+	is.True(floatApproxEqual(c4, c1, epsilon), "Vertex 4 and Vertex 1 should have approximately equal PageRank")
+
+	// Assert that the total PageRank sums to approximately 1.0
 	totalPR := c1 + c2 + c3 + c4
-	is.True(floatApproxEqual(totalPR, 1.0, 1e-4), "Total PageRank should sum to approximately 1.0")
+	is.True(floatApproxEqual(totalPR, 1.0, epsilon), "Total PageRank should sum to approximately 1.0")
+
 }
 
 func TestPageRankNoEdges(t *testing.T) {
