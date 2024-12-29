@@ -43,21 +43,21 @@ import (
 //   - An error if the computation fails (e.g., invalid graph or parameters).
 //
 // Example Usage:
-//   g, _ := simple.New[int, int](graph.IntHash, graph.Directed())
-//   // Add vertices and edges to `g`
-//   pr, err := PageRank(g, 0.85, 100, 1e-6)
-//   if err != nil {
-//       fmt.Println("Error:", err)
-//   } else {
-//       fmt.Println("PageRank Scores:", pr)
-//   }
+//
+//	g, _ := simple.New[int, int](graph.IntHash, graph.Directed())
+//	// Add vertices and edges to `g`
+//	pr, err := PageRank(g, 0.85, 100, 1e-6)
+//	if err != nil {
+//	    fmt.Println("Error:", err)
+//	} else {
+//	    fmt.Println("PageRank Scores:", pr)
+//	}
 func PageRank[K graph.Ordered, T any](
 	g graph.Interface[K, T],
 	dampingFactor float64,
 	maxIterations int,
 	tol float64,
 ) (map[K]float64, error) {
-	// Validate input parameters
 	if g == nil {
 		return nil, graph.ErrNilInputGraph
 	}

@@ -28,7 +28,7 @@ func TestStronglyConnectedComponents(t *testing.T) {
 		is.NoError(g.AddEdgeWithOptions(2, 3))
 		is.NoError(g.AddEdgeWithOptions(3, 1))
 
-		components, err := TarjanSCC(g)
+		components, err := TarjanFrom(g)
 		is.NoError(err)
 		is.Equal(1, len(components), "Interface should have 1 SCC")
 		is.ElementsMatch([]int{1, 2, 3}, components[0], "SCC should contain all vertices")
@@ -41,7 +41,7 @@ func TestStronglyConnectedComponents(t *testing.T) {
 		g, _ := simple.New(graph.IntHash) // undirected graph
 		is.NoError(g.AddVertexWithOptions(1))
 
-		components, err := TarjanSCC(g)
+		components, err := TarjanFrom(g)
 		is.Error(err)
 		is.Nil(components, "Components should be nil for undirected graph")
 		is.ErrorIs(err, graph.ErrSCCDetectionNotDirected, "Error should be ErrSCCDetectionNotDirected")
