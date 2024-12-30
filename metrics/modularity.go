@@ -7,6 +7,25 @@ import (
 )
 
 // Modularity calculates the modularity of the given graph based on a provided community structure.
+//
+// Modularity is a measure of the structure of a graph, indicating the strength of division
+// of the graph into communities. A higher modularity value implies that the graph has
+// dense connections within communities but sparse connections between them.
+//
+// Parameters:
+//   - g: A graph.Interface representing the graph. The graph must provide the necessary methods
+//     to calculate edge weights and community-based statistics.
+//   - communities: A map[K]int representing the community structure, where each key is a vertex
+//     identifier, and the corresponding value is the community ID to which the vertex belongs.
+//
+// Returns:
+//   - A float64 representing the modularity of the graph, a value between -0.5 and 1.
+//   - An error if the computation cannot be performed (e.g., invalid community structure
+//     or graph properties).
+//
+// Type Parameters:
+// - K: The type of the graph's vertex keys, which must implement the graph.Ordered interface.
+// - T: The type of the graph's vertex data, which can be any type.
 func Modularity[K graph.Ordered, T any](g graph.Interface[K, T], communities map[K]int) (float64, error) {
 	if g == nil {
 		return 0, graph.ErrNilInputGraph
@@ -32,7 +51,6 @@ func calculateUndirectedModularity[K graph.Ordered, T any](g graph.Interface[K, 
 	}
 
 	totalEdges := float64(edgeCount * 2) // Normalize by 2m
-	fmt.Printf("Edge count: %d, Total edges (2m): %f\n", edgeCount, totalEdges)
 
 	modularitySum := 0.0
 
@@ -72,22 +90,14 @@ func calculateUndirectedModularity[K graph.Ordered, T any](g graph.Interface[K, 
 
 			// Correct expected term using totalEdges
 			expected := float64(degreeV1*degreeV2) / totalEdges
-			fmt.Printf("Pair (%v, %v): Degrees: (%d, %d), Aij: %f, Expected: %f\n",
-				v1, v2, degreeV1, degreeV2, aij, expected)
-			fmt.Printf("Expected calculation: (%d * %d) / %f = %f\n", degreeV1, degreeV2, totalEdges, expected)
 
 			contribution := aij - expected
 			modularitySum += contribution
 		}
 	}
 
-	// Debugging total before normalization
-	fmt.Printf("Modularity sum before normalization: %f\n", modularitySum)
-
 	// Normalize by total edges (2m)
 	modularity := modularitySum / totalEdges
-	fmt.Printf("Normalized modularity: %f\n", modularity)
-
 	return modularity, nil
 }
 
@@ -140,7 +150,7 @@ func calculateDirectedModularity[K graph.Ordered, T any](g graph.Interface[K, T]
 			}
 
 			expected := float64(outDegreeV1*inDegreeV2) / totalEdges
-			modularitySum += (aij - expected)
+			modularitySum += aij - expected
 		}
 	}
 

@@ -14,6 +14,22 @@ import (
 )
 
 // AveragePathLength calculates the average shortest path length in the given graph.
+//
+// It computes the average of the shortest path lengths between all pairs of vertices
+// in the graph. If the graph is disconnected, the function returns an error as the
+// calculation is not well-defined in such cases.
+//
+// Parameters:
+//   - g: A graph.Interface representing the graph. The graph must implement the
+//     necessary methods for traversal and shortest path calculation.
+//
+// Returns:
+// - A float64 representing the average shortest path length.
+// - An error if the graph is disconnected or any other issue arises during computation.
+//
+// Type Parameters:
+// - K: The type of the graph's vertex keys, which must implement the graph.Ordered interface.
+// - T: The type of the graph's vertex data, which can be any type.
 func AveragePathLength[K graph.Ordered, T any](g graph.Interface[K, T]) (float64, error) {
 	if g == nil {
 		return 0, graph.ErrNilInputGraph

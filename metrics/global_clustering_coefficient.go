@@ -12,6 +12,23 @@ import (
 )
 
 // GlobalClusteringCoefficient calculates the global clustering coefficient of the given graph.
+//
+// The global clustering coefficient is a measure of the degree to which nodes in a graph
+// tend to cluster together. It is defined as the ratio of the number of closed triplets
+// (triangles) to the total number of triplets (both open and closed) in the graph.
+//
+// Parameters:
+//   - g: A graph.Interface representing the graph. The graph must provide the necessary
+//     methods to traverse edges and count triangles or triplets.
+//
+// Returns:
+//   - A float64 representing the global clustering coefficient, which is a value between 0 and 1.
+//   - An error if the computation encounters an issue, such as a graph structure that prevents
+//     the calculation.
+//
+// Type Parameters:
+// - K: The type of the graph's vertex keys, which must implement the graph.Ordered interface.
+// - T: The type of the graph's vertex data, which can be any type.
 func GlobalClusteringCoefficient[K graph.Ordered, T any](g graph.Interface[K, T]) (float64, error) {
 	if g == nil {
 		return 0, graph.ErrNilInputGraph

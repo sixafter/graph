@@ -14,6 +14,22 @@ import (
 )
 
 // Diameter calculates the diameter of the given graph.
+//
+// The diameter of a graph is the length of the longest shortest path between any
+// pair of vertices in the graph. If the graph is disconnected, the function returns
+// an error since the diameter is not well-defined in such cases.
+//
+// Parameters:
+//   - g: A graph.Interface representing the graph. The graph must support shortest
+//     path calculations between all pairs of vertices.
+//
+// Returns:
+// - An int representing the diameter of the graph.
+// - An error if the graph is disconnected or the computation encounters an issue.
+//
+// Type Parameters:
+// - K: The type of the graph's vertex keys, which must implement the graph.Ordered interface.
+// - T: The type of the graph's vertex data, which can be any type.
 func Diameter[K graph.Ordered, T any](g graph.Interface[K, T]) (int, error) {
 	if g == nil {
 		return 0, graph.ErrNilInputGraph

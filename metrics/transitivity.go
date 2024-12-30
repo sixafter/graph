@@ -12,6 +12,24 @@ import (
 )
 
 // Transitivity calculates the transitivity of the given graph.
+//
+// Transitivity is a measure of the overall clustering of a graph. It is defined
+// as the ratio of three times the number of triangles (closed triplets) in the graph
+// to the number of connected triplets of vertices. It is also known as the global
+// clustering coefficient.
+//
+// Parameters:
+//   - g: A graph.Interface representing the graph. The graph must provide methods to
+//     identify and count triangles and triplets.
+//
+// Returns:
+//   - A float64 representing the transitivity of the graph, which is a value between 0 and 1.
+//   - An error if the calculation cannot be performed due to issues with the graph's structure
+//     or data.
+//
+// Type Parameters:
+// - K: The type of the graph's vertex keys, which must implement the graph.Ordered interface.
+// - T: The type of the graph's vertex data, which can be any type.
 func Transitivity[K graph.Ordered, T any](g graph.Interface[K, T]) (float64, error) {
 	if g == nil {
 		return 0, graph.ErrNilInputGraph
