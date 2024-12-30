@@ -190,7 +190,7 @@ func TestClusteringCoefficientDirectedGraph(t *testing.T) {
 	//   C(v) = 1 / (2 * 1) = 0.5
 	// - Vertex 2: Neighbors {3}; degree < 2, C(v) = 0.0
 	// - Vertex 3: Neighbors {1,4}; edges between neighbors: 1->4 does not exist
-	//   C(v) = 0 / (2 *1) = 0.0
+	//   C(v) = 0 / (2 * 1) = 0.0
 	// - Vertex 4: Neighbors {}; C(v) = 0.0
 	expected := map[int]float64{
 		g.Hash()(1): 0.5,
@@ -199,9 +199,11 @@ func TestClusteringCoefficientDirectedGraph(t *testing.T) {
 		g.Hash()(4): 0.0,
 	}
 
+	epsilon := 1e-4
+
 	for k, expectedVal := range expected {
 		actualVal, exists := clustering[k]
 		is.True(exists, fmt.Sprintf("Vertex %v should exist in the clustering map", k))
-		is.True(floatEquals(expectedVal, actualVal), fmt.Sprintf("Vertex %v should have a clustering coefficient of %.4f, got %.4f", k, expectedVal, actualVal))
+		is.True(floatApproxEqual(expectedVal, actualVal, epsilon), fmt.Sprintf("Vertex %v should have a clustering coefficient of %.4f, got %.4f", k, expectedVal, actualVal))
 	}
 }
