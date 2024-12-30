@@ -232,7 +232,6 @@ type VertexOption func(*VertexProperties)
 type Vertex[K comparable, T any] struct {
 	id         K
 	value      T
-	metadata   any
 	properties graph.VertexProperties
 }
 
@@ -286,8 +285,8 @@ func (v *Vertex[K, T]) Properties() graph.VertexProperties {
 //     be used in graph algorithms.
 type VertexProperties struct {
 	v        map[string]any
-	weight   float64
 	metadata any
+	weight   float64
 }
 
 // VertexWeight returns a functional option to set the weight of a Vertex.
