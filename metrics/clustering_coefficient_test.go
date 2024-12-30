@@ -181,22 +181,25 @@ func TestClusteringCoefficientDirectedGraph(t *testing.T) {
 	is.NoError(g.AddEdgeWithOptions(3, 1))
 	is.NoError(g.AddEdgeWithOptions(3, 4))
 
+	// Debug adjacency map
+	adjacency, _ := g.AdjacencyMap()
+	fmt.Printf("Adjacency map: %v\n", adjacency)
+
 	// Compute clustering coefficients
 	clustering, err := ClusteringCoefficient(g)
 	is.NoError(err)
 
-	// Clustering coefficients:
-	// - Vertex 1: Neighbors {2,3}; edges between neighbors: 2->3 exists
-	//   C(v) = 1 / (2 * 1) = 0.5
-	// - Vertex 2: Neighbors {3}; degree < 2, C(v) = 0.0
-	// - Vertex 3: Neighbors {1,4}; edges between neighbors: 1->4 does not exist
-	//   C(v) = 0 / (2 * 1) = 0.0
-	// - Vertex 4: Neighbors {}; C(v) = 0.0
+	// Debug clustering coefficients
+	for vertex, coefficient := range clustering {
+		fmt.Printf("Vertex %v: Clustering coefficient %.4f\n", vertex, coefficient)
+	}
+
+	// Define expected coefficients
 	expected := map[int]float64{
-		g.Hash()(1): 0.5,
-		g.Hash()(2): 0.0,
-		g.Hash()(3): 0.0,
-		g.Hash()(4): 0.0,
+		1: 0.5,
+		2: 0.0,
+		3: 0.0,
+		4: 0.0,
 	}
 
 	epsilon := 1e-4
@@ -204,6 +207,7 @@ func TestClusteringCoefficientDirectedGraph(t *testing.T) {
 	for k, expectedVal := range expected {
 		actualVal, exists := clustering[k]
 		is.True(exists, fmt.Sprintf("Vertex %v should exist in the clustering map", k))
-		is.True(floatApproxEqual(expectedVal, actualVal, epsilon), fmt.Sprintf("Vertex %v should have a clustering coefficient of %.4f, got %.4f", k, expectedVal, actualVal))
+		is.True(floatApproxEqual(expectedVal, actualVal, epsilon),
+			fmt.Sprintf("Vertex %v should have a clustering coefficient of %.4f, got %.4f", k, expectedVal, actualVal))
 	}
 }
