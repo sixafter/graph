@@ -315,7 +315,7 @@ type Interface[K Ordered, T any] interface {
 	// Size returns the number of edges in the graph.
 	//
 	// Example:
-	//	size, err := graph.Size()
+	//	size, err := graph.Len()
 	//	if err != nil {
 	//		log.Fatal(err)
 	//	}

@@ -33,6 +33,32 @@ import (
 //		fmt.Printf("Shortest path: %v\n", path)
 //	}
 func DijkstraFrom[K graph.Ordered, T any](g graph.Interface[K, T], source, target K) ([]K, error) {
+	if g == nil {
+		return nil, graph.ErrNilInputGraph
+	}
+
+	if source == target {
+		return []K{source}, nil
+	}
+
+	exists, err := g.HasVertex(source)
+	if err != nil {
+		return nil, err
+	}
+
+	if !exists {
+		return nil, graph.ErrVertexNotFound
+	}
+
+	exists, err = g.HasVertex(target)
+	if err != nil {
+		return nil, err
+	}
+
+	if !exists {
+		return nil, graph.ErrVertexNotFound
+	}
+
 	weights := make(map[K]float64)
 	visited := make(map[K]bool)
 
@@ -51,13 +77,13 @@ func DijkstraFrom[K graph.Ordered, T any](g graph.Interface[K, T], source, targe
 			visited[hash] = false
 		}
 
-		q.Push(hash, weights[hash])
+		q.Enqueue(hash, weights[hash])
 	}
 
 	bestPredecessors := make(map[K]K)
 
 	for q.Len() > 0 {
-		vertex, _ := q.Pop()
+		vertex, _ := q.Dequeue()
 		hasInfiniteWeight := math.IsInf(weights[vertex], 1)
 
 		for adjacency, edge := range adjacencyMap[vertex] {

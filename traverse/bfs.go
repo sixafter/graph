@@ -43,6 +43,10 @@ import (
 //
 // BFS is non-recursive and maintains a Stack instead.
 func BFS[K graph.Ordered, T any](g graph.Interface[K, T], start K, visit func(K) bool) error {
+	if g == nil {
+		return graph.ErrNilInputGraph
+	}
+
 	ignoreDepth := func(vertex K, _ int) bool {
 		return visit(vertex)
 	}
@@ -72,6 +76,10 @@ func BFS[K graph.Ordered, T any](g graph.Interface[K, T], start K, visit func(K)
 //
 // Complexity: O(Items + E), where Items is the number of vertices and E is the number of edges.
 func BFSWithDepthTracking[K graph.Ordered, T any](g graph.Interface[K, T], start K, visit func(K, int) bool) error {
+	if g == nil {
+		return graph.ErrNilInputGraph
+	}
+
 	// Retrieve the adjacency map of the graph.
 	adjacencyMap, err := g.AdjacencyMap()
 	if err != nil {
@@ -80,7 +88,7 @@ func BFSWithDepthTracking[K graph.Ordered, T any](g graph.Interface[K, T], start
 
 	// Ensure the starting vertex exists in the graph.
 	if _, ok := adjacencyMap[start]; !ok {
-		return fmt.Errorf("could not find start vertex with hash %v", start)
+		return fmt.Errorf("could not find start vertex with key %v", start)
 	}
 
 	// Define a helper type for the BFS queue, which stores the vertex and its depth.
@@ -89,8 +97,8 @@ func BFSWithDepthTracking[K graph.Ordered, T any](g graph.Interface[K, T], start
 		depth  int // The depth of the vertex from the starting point.
 	}
 
-	// Initialize the queue with the starting vertex at depth 1.
-	q := []queueNode{{vertex: start, depth: 1}}
+	// Initialize the queue with the starting vertex at depth 0.
+	q := []queueNode{{vertex: start, depth: 0}}
 
 	// Create a map to track visited vertices, starting with the initial vertex.
 	visited := make(map[K]bool)

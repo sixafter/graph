@@ -392,13 +392,13 @@ func (d *directedGraph[K, T]) Neighbors(hash K) ([]graph.Vertex[K, T], error) {
 	return neighbors, nil
 }
 
-func (d *directedGraph[K, T]) Degree(hash K) (int, error) {
-	inDegree, err := d.InDegree(hash)
+func (d *directedGraph[K, T]) Degree(key K) (int, error) {
+	inDegree, err := d.InDegree(key)
 	if err != nil {
 		return 0, err
 	}
 
-	outDegree, err := d.OutDegree(hash)
+	outDegree, err := d.OutDegree(key)
 	if err != nil {
 		return 0, err
 	}

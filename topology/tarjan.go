@@ -13,15 +13,15 @@ import (
 	"github.com/sixafter/graph/internal/queue"
 )
 
-// TarjanSCC identifies all Strongly Connected Components (SCCs) in a directed graph.
+// TarjanFrom identifies all Strongly Connected Components (SCCs) in a directed graph.
 //
 // In formal graph-theoretic terms, let G = (Items, E) be a directed graph where Items is the set of vertices
 // and E is the set of edges. A Strongly Connected Component S ⊆ Items is a maximal subset of vertices
 // such that for every pair of vertices u, v ∈ S, there is a directed path from u to v and a directed
 // path from v to u. SCCs thus represent subgraphs where connectivity is mutual.
 //
-// This function uses TarjanSCC’s algorithm, a well-known linear-time procedure (O(|Items| + |E|)) for finding SCCs.
-// TarjanSCC’s algorithm performs a single depth-first search (DFS) to compute a unique "discovery index"
+// This function uses TarjanFrom’s algorithm, a well-known linear-time procedure (O(|Items| + |E|)) for finding SCCs.
+// TarjanFrom’s algorithm performs a single depth-first search (DFS) to compute a unique "discovery index"
 // (or timestamp) for each vertex. It also maintains a "low-link" value that tracks the smallest
 // discovery index of any vertex reachable from a given vertex, including itself and via back edges.
 // When a vertex’s low-link value matches its own discovery index, it signifies the root of an SCC.
@@ -40,13 +40,13 @@ import (
 //
 // Example:
 //
-//	components, err := TarjanSCC(graph)
+//	components, err := TarjanFrom(graph)
 //	if err != nil {
 //		log.Fatal(err)
 //	} else {
 //		fmt.Printf("Strongly Connected Components: %v\n", components)
 //	}
-func TarjanSCC[K graph.Ordered, T any](g graph.Interface[K, T]) ([][]K, error) {
+func TarjanFrom[K graph.Ordered, T any](g graph.Interface[K, T]) ([][]K, error) {
 	if !g.Traits().IsDirected {
 		return nil, graph.ErrSCCDetectionNotDirected
 	}
@@ -85,7 +85,7 @@ type sccState[K comparable] struct {
 }
 
 // findSCC identifies and extracts strongly connected components (SCCs)
-// from a directedGraph graph using TarjanSCC's algorithm. It is a recursive depth-first search (DFS)
+// from a directedGraph graph using TarjanFrom's algorithm. It is a recursive depth-first search (DFS)
 // based approach that computes the SCCs in a single traversal.
 //
 // A strongly connected component is a maximal subgraph where any vertex is reachable from
@@ -97,7 +97,7 @@ type sccState[K comparable] struct {
 //     adjacency relationships, and resulting components.
 //
 // Algorithm Steps:
-//  1. Push the current vertex onto the Stack and mark it as visited.
+//  1. Enqueue the current vertex onto the Stack and mark it as visited.
 //  2. Assign the vertex an initial index and lowLink value based on the current DFS timestamp.
 //  3. Explore all adjacent vertices:
 //     - If the adjacent vertex has not been visited, recursively call this function on it.
@@ -105,7 +105,7 @@ type sccState[K comparable] struct {
 //     to reflect the presence of a back edge.
 //  4. After visiting all adjacent vertices, check if the current vertex is the root of an SCC:
 //     - If its lowLink value equals its index, the SCC is identified.
-//     - Pop vertices from the Stack until the current vertex is reached and group them as a component.
+//     - Dequeue vertices from the Stack until the current vertex is reached and group them as a component.
 //  5. Append the identified component to the list of SCCs.
 //
 // Type Parameters:

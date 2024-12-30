@@ -6,183 +6,145 @@
 package queue
 
 import (
+	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestPriorityQueuePushPop(t *testing.T) {
+func TestQueue_FIFO(t *testing.T) {
 	t.Parallel()
 	is := assert.New(t)
 
-	pq := NewPriorityQueue[string]()
-	pq.Push("low", 10.0)
-	pq.Push("medium", 5.0)
-	pq.Push("high", 1.0)
+	// Create a FIFO queue
+	q := NewQueue(WithMode(ModeFIFO))
 
-	item, err := pq.Pop()
+	// Enqueue elements
+	q.Enqueue("first")
+	q.Enqueue("second")
+	q.Enqueue("third")
+
+	// Check size
+	is.Equal(3, q.Len())
+
+	// Peek at the front element
+	value, err := q.Peek()
 	is.NoError(err)
-	is.Equal("high", item, "Expected item with highest priority (lowest value)")
+	is.Equal("first", value)
 
-	item, err = pq.Pop()
-	is.NoError(err)
-	is.Equal("medium", item, "Expected next highest priority item")
+	// Dequeue elements and validate FIFO order
+	expected := []string{"first", "second", "third"}
+	for _, exp := range expected {
+		value, err := q.Dequeue()
+		is.NoError(err)
+		is.Equal(exp, value)
+	}
 
-	item, err = pq.Pop()
-	is.NoError(err)
-	is.Equal("low", item, "Expected last item with lowest priority")
+	// Check if the queue is empty
+	is.True(q.IsEmpty())
 
-	_, err = pq.Pop()
+	// Attempt to dequeue from an empty queue
+	_, err = q.Dequeue()
 	is.Error(err)
-	is.ErrorIs(err, ErrPriorityQueueEmpty)
+	is.Equal("queue is empty", err.Error())
 }
 
-func TestPriorityQueueSetPriority(t *testing.T) {
+func TestQueue_LIFO(t *testing.T) {
 	t.Parallel()
 	is := assert.New(t)
 
-	pq := NewPriorityQueue[string]()
-	pq.Push("task1", 3.0)
-	pq.Push("task2", 2.0)
-	pq.SetPriority("task1", 1.0)
+	// Create a LIFO queue
+	q := NewQueue(WithMode(ModeLIFO))
 
-	item, err := pq.Pop()
+	// Enqueue elements
+	q.Enqueue("first")
+	q.Enqueue("second")
+	q.Enqueue("third")
+
+	// Check size
+	is.Equal(3, q.Len())
+
+	// Peek at the top element
+	value, err := q.Peek()
 	is.NoError(err)
-	is.Equal("task1", item, "task1 priority was updated to highest")
-}
+	is.Equal("third", value)
 
-func TestStackPushPop(t *testing.T) {
-	t.Parallel()
-	is := assert.New(t)
+	// Dequeue elements and validate LIFO order
+	expected := []string{"third", "second", "first"}
+	for _, exp := range expected {
+		value, err := q.Dequeue()
+		is.NoError(err)
+		is.Equal(exp, value)
+	}
 
-	s := NewStack[int]()
-	s.Push(1)
-	s.Push(2)
-	s.Push(3)
+	// Check if the queue is empty
+	is.True(q.IsEmpty())
 
-	item, ok := s.Pop()
-	is.True(ok)
-	is.Equal(3, item, "Expected last pushed item")
-
-	item, ok = s.Pop()
-	is.True(ok)
-	is.Equal(2, item, "Expected second-to-last pushed item")
-
-	item, ok = s.Pop()
-	is.True(ok)
-	is.Equal(1, item, "Expected first pushed item")
-
-	_, ok = s.Pop()
-	is.False(ok, "Stack should be empty")
-}
-
-func TestStackContains(t *testing.T) {
-	t.Parallel()
-	is := assert.New(t)
-
-	s := NewStack[int]()
-	s.Push(1)
-	s.Push(2)
-
-	is.True(s.Contains(1))
-	is.True(s.Contains(2))
-	is.False(s.Contains(3))
-}
-
-func TestStackIsEmpty(t *testing.T) {
-	t.Parallel()
-	is := assert.New(t)
-
-	s := NewStack[int]()
-	is.True(s.IsEmpty())
-
-	s.Push(1)
-	is.False(s.IsEmpty())
-}
-
-func TestStackOfStacksPushPop(t *testing.T) {
-	t.Parallel()
-	is := assert.New(t)
-
-	sos := NewStackOfStacks[int]()
-	stack1 := NewStack[int]()
-	stack2 := NewStack[int]()
-
-	stack1.Push(1)
-	stack2.Push(2)
-
-	sos.Push(stack1)
-	sos.Push(stack2)
-
-	topStack, err := sos.Pop()
-	is.NoError(err)
-	topItem, ok := topStack.Pop()
-	is.True(ok)
-	is.Equal(2, topItem, "Expected item from the top stack")
-
-	topStack, err = sos.Pop()
-	is.NoError(err)
-	topItem, ok = topStack.Pop()
-	is.True(ok)
-	is.Equal(1, topItem, "Expected item from the second stack")
-
-	_, err = sos.Pop()
+	// Attempt to dequeue from an empty queue
+	_, err = q.Dequeue()
 	is.Error(err)
-	is.ErrorIs(err, ErrStackEmpty)
+	is.Equal("queue is empty", err.Error())
 }
 
-func TestStackOfStacksTop(t *testing.T) {
+func TestQueue_ConcurrentAccess(t *testing.T) {
 	t.Parallel()
 	is := assert.New(t)
 
-	sos := NewStackOfStacks[int]()
-	stack := NewStack[int]()
-	stack.Push(42)
+	// Create a FIFO queue
+	q := NewQueue(WithMode(ModeFIFO))
 
-	sos.Push(stack)
+	// Define the number of operations
+	const numOps = 1000
 
-	topStack, err := sos.Top()
-	is.NoError(err)
+	// Use wait groups to synchronize enqueue and dequeue operations
+	var wg sync.WaitGroup
+	wg.Add(2) // Two goroutines: one for enqueue and one for dequeue
 
-	topItem, ok := topStack.Top()
-	is.True(ok)
-	is.Equal(42, topItem, "Expected item from the top stack")
+	// Enqueue elements in a goroutine
+	go func() {
+		defer wg.Done()
+		for i := 0; i < numOps; i++ {
+			q.Enqueue(i)
+		}
+	}()
+
+	// Dequeue elements in a goroutine
+	go func() {
+		defer wg.Done()
+		for i := 0; i < numOps; i++ {
+			// Dequeue with retry to handle empty queue errors
+			for {
+				_, err := q.Dequeue()
+				if err == nil {
+					break
+				}
+			}
+		}
+	}()
+
+	// Wait for all goroutines to finish
+	wg.Wait()
+
+	// Verify the queue is empty after concurrent operations
+	is.True(q.IsEmpty(), "Queue should be empty after all operations")
 }
 
-func TestPriorityQueueUpdateNonexistentItem(t *testing.T) {
-	t.Parallel()
-
-	pq := NewPriorityQueue[string]()
-	pq.Push("task1", 5.0)
-
-	pq.SetPriority("task2", 1.0)
-}
-
-func TestStackUnderflow(t *testing.T) {
-	t.Parallel()
-	is := assert.New(t)
-
-	s := NewStack[int]()
-	_, ok := s.Pop()
-	is.False(ok, "Popping from an empty stack should fail")
-}
-
-func TestStackOfStacksUnderflow(t *testing.T) {
-	t.Parallel()
-	is := assert.New(t)
-
-	sos := NewStackOfStacks[int]()
-	_, err := sos.Pop()
-	is.Error(err, "Popping from an empty stack of stacks should fail")
-	is.ErrorIs(err, ErrStackEmpty)
-}
-
-func TestPriorityQueueEmpty(t *testing.T) {
+func TestQueue_DefaultMode(t *testing.T) {
 	t.Parallel()
 	is := assert.New(t)
 
-	pq := NewPriorityQueue[string]()
-	_, err := pq.Pop()
-	is.Error(err, "Popping from an empty priority queue should fail")
-	is.ErrorIs(err, ErrPriorityQueueEmpty)
+	// Create a queue with the default mode (FIFO)
+	q := NewQueue()
+
+	// Enqueue elements
+	q.Enqueue("first")
+	q.Enqueue("second")
+
+	// Dequeue elements and validate FIFO order
+	expected := []string{"first", "second"}
+	for _, exp := range expected {
+		value, err := q.Dequeue()
+		is.NoError(err)
+		is.Equal(exp, value)
+	}
 }

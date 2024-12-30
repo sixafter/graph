@@ -193,7 +193,8 @@ func symmetricDifferenceDirected[K graph.Ordered, T any](g, h graph.Interface[K,
 				if err != nil {
 					return nil, fmt.Errorf("failed to fetch vertex %v from h: %w", hTarget, err)
 				}
-				if err := result.AddVertex(hVertex); err != nil {
+
+				if err = result.AddVertex(hVertex); err != nil {
 					return nil, fmt.Errorf("failed to add vertex %v to result: %w", hTarget, err)
 				}
 			}
@@ -252,7 +253,8 @@ func symmetricDifferenceUndirected[K graph.Ordered, T any](g, h graph.Interface[
 			if err != nil {
 				return nil, fmt.Errorf("failed to fetch vertex %v from h: %w", hSource, err)
 			}
-			if err := result.AddVertex(hVertex); err != nil {
+
+			if err = result.AddVertex(hVertex); err != nil {
 				return nil, fmt.Errorf("failed to add vertex %v to result: %w", hSource, err)
 			}
 		}
@@ -264,7 +266,7 @@ func symmetricDifferenceUndirected[K graph.Ordered, T any](g, h graph.Interface[
 				if err != nil {
 					return nil, fmt.Errorf("failed to fetch vertex %v from h: %w", hTarget, err)
 				}
-				if err := result.AddVertex(hVertex); err != nil {
+				if err = result.AddVertex(hVertex); err != nil {
 					return nil, fmt.Errorf("failed to add vertex %v to result: %w", hTarget, err)
 				}
 			}

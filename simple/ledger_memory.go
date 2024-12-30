@@ -39,9 +39,6 @@ type memoryLedger[K graph.Ordered, T any] struct {
 	// The inner map maps the source vertex identifiers to their corresponding Edge objects.
 	inEdges map[K]map[K]graph.Edge[K]
 
-	// ledger embeds the Storage interface, allowing this type to fulfill the interface's contract.
-	ledger[K, T]
-
 	// lock is a read-write mutex used to ensure thread-safe access to the graph's data.
 	lock sync.RWMutex
 
