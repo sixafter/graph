@@ -1,10 +1,10 @@
 module github.com/sixafter/graph
 
-go 1.23
+go 1.24
 
 require (
 	github.com/stretchr/testify v1.10.0
-	golang.org/x/exp v0.0.0-20241217172543-b2144cdd0a67
+	golang.org/x/exp v0.0.0-20250210185358-939b2ce775ac
 )
 
 require (
