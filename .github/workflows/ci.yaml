@@ -1,3 +1,8 @@
+# Copyright (c) 2024 Six After, Inc
+#
+# This source code is licensed under the Apache 2.0 License found in the
+# LICENSE file in the root directory of this source tree.
+
 # Ref: https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions
 name: ci
 
@@ -53,7 +58,7 @@ jobs:
 
       # Ref: https://github.com/golangci/golangci-lint-action
       - name: Lint
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v7
         with:
           args: --timeout=30m --config=.golangci.yaml --issues-exit-code=0
 
@@ -70,7 +75,7 @@ jobs:
           make analyze          
 
       # Ref: https://github.com/actions/cache
-      - name: Cache SonarCloud Packages
+      - name: Cache SonarQube Packages
         uses: actions/cache@v4
         with:
           path: ~/.sonar/cache
@@ -78,8 +83,8 @@ jobs:
           restore-keys: ${{ runner.os }}-sonar-
 
       # Ref: https://github.com/SonarSource/sonarqube-scan-action
-      - name: Scan with SonarCloud
-        uses: sonarsource/sonarqube-scan-action@v4
+      - name: Scan with SonarQube
+        uses: sonarsource/sonarqube-scan-action@v5
         with:
           projectBaseDir: ./
         env:
