@@ -11,17 +11,17 @@ A Go library for creating and manipulating graph data structures.
 
 ## Status
 
-### 🛠️ Build & Test
+### Build & Test
 
 [![CI](https://github.com/sixafter/graph/workflows/ci/badge.svg)](https://github.com/sixafter/graph/actions)
 [![GitHub issues](https://img.shields.io/github/issues/sixafter/graph)](https://github.com/sixafter/graph/issues)
 
-### 🚦Quality
+### Quality
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=six-after_graph&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=six-after_graph)
 ![CodeQL](https://github.com/sixafter/graph/actions/workflows/codeql-analysis.yaml/badge.svg)
 
-### 🚀 Package and Deploy
+### Package and Deploy
 
 [![Release](https://github.com/sixafter/graph/workflows/release/badge.svg)](https://github.com/sixafter/graph/actions)
 
