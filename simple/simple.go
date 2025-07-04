@@ -315,26 +315,33 @@ func VertexItems(items map[string]any) graph.VertexOption {
 	}
 }
 
-func (v *VertexProperties) Items() map[string]any {
-	return v.v
+func VertexMetadata(data any) graph.VertexOption {
+	return func(e graph.VertexProperties) {
+		p := e.(*VertexProperties)
+		p.metadata = data
+	}
 }
 
-func (v *VertexProperties) Weight() float64 {
-	return v.weight
+func (p *VertexProperties) Items() map[string]any {
+	return p.v
 }
 
-func (v *VertexProperties) Metadata() any {
-	return v.metadata
+func (p *VertexProperties) Weight() float64 {
+	return p.weight
+}
+
+func (p *VertexProperties) Metadata() any {
+	return p.metadata
 }
 
 // Clone creates a deep copy of the Vertex properties and returns the new instance.
-func (v *VertexProperties) Clone() graph.VertexProperties {
+func (p *VertexProperties) Clone() graph.VertexProperties {
 	clone := VertexProperties{
 		v:      make(map[string]any),
-		weight: v.weight,
+		weight: p.weight,
 	}
 
-	for k, v := range v.v {
+	for k, v := range p.v {
 		clone.v[k] = v
 	}
 

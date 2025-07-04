@@ -18,6 +18,19 @@ Date format: `YYYY-MM-DD`
 ### Security
 
 ---
+## [0.5.0] - 2025-07-03
+
+### Added
+- **feature:** Added `FNV-1a` hash function for graph nodes.
+- **feature:** Added `Sha256Hash` hash function for graph nodes.
+
+### Changed
+### Deprecated
+### Removed
+### Fixed
+### Security
+
+---
 ## [0.4.1] - 2025-07-01
 
 ### Added
@@ -91,7 +104,8 @@ Date format: `YYYY-MM-DD`
 ### Fixed
 ### Security
 
-[Unreleased]: https://github.com/sixafter/graph/compare/v0.4.1...HEAD
+[Unreleased]: https://github.com/sixafter/graph/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/sixafter/graph/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/sixafter/graph/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/sixafter/graph/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/sixafter/graph/compare/v0.2.0...v0.3.0

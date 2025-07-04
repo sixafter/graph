@@ -158,3 +158,53 @@ func TestZeroFloat32Hash(t *testing.T) {
 
 	as.Equal(expectedHash, hash, "Float32Hash of zero should return zero")
 }
+
+func TestFNV1aHash64_Determinism(t *testing.T) {
+	hash1 := FNV1aHash64("vertex")
+	hash2 := FNV1aHash64("vertex")
+	if hash1 != hash2 {
+		t.Fatal("FNV1aHash64 should be deterministic")
+	}
+}
+
+func TestFNV1aHash64_Uniqueness(t *testing.T) {
+	hash1 := FNV1aHash64("a")
+	hash2 := FNV1aHash64("b")
+	if hash1 == hash2 {
+		t.Fatal("FNV1aHash64 should produce different hashes for different inputs")
+	}
+}
+
+func TestFNV1aHash128_Determinism(t *testing.T) {
+	hash1 := FNV1aHash128("vertex")
+	hash2 := FNV1aHash128("vertex")
+	if hash1 != hash2 {
+		t.Fatal("FNV1aHash128 should be deterministic")
+	}
+}
+
+func TestFNV1aHash128_Uniqueness(t *testing.T) {
+	hash1 := FNV1aHash128("a")
+	hash2 := FNV1aHash128("b")
+	if hash1 == hash2 {
+		t.Fatal("FNV1aHash128 should produce different hashes for different inputs")
+	}
+}
+
+func TestSha256Hash_Determinism(t *testing.T) {
+	t.Parallel()
+	hash1 := Sha256Hash("vertex-id")
+	hash2 := Sha256Hash("vertex-id")
+	if hash1 != hash2 {
+		t.Fatal("Sha256Hash should be deterministic")
+	}
+}
+
+func TestSha256Hash_DifferentInputs(t *testing.T) {
+	t.Parallel()
+	hash1 := Sha256Hash("a")
+	hash2 := Sha256Hash("b")
+	if hash1 == hash2 {
+		t.Fatal("Sha256Hash should produce different hashes for different inputs")
+	}
+}

@@ -265,7 +265,8 @@ func TestCycleDetectionInDirectedGraph(t *testing.T) {
 
 	// Add vertices
 	for _, v := range []string{"A", "B", "C", "D"} {
-		is.NoError(g.AddVertexWithOptions(v))
+		i := NewVertexWithOptions(v, v)
+		is.NoError(g.AddVertex(i))
 	}
 
 	// Add edges to form a cycle: A -> B -> C -> A
@@ -314,8 +315,8 @@ func TestWeightedUndirectedGraph(t *testing.T) {
 
 	// Add vertices
 	vertices := []string{"Node1", "Node2", "Node3", "Node4"}
-	for _, v := range vertices {
-		is.NoError(g.AddVertexWithOptions(v))
+	for k, v := range vertices {
+		is.NoError(g.AddVertexWithOptions(v, VertexMetadata(k)))
 	}
 
 	// Add weighted edges
