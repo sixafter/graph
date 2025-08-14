@@ -18,6 +18,18 @@ Date format: `YYYY-MM-DD`
 ### Security
 
 ---
+## [0.7.0] - 2025-08-14
+
+### Added
+### Changed
+- **debt:** Updated to Go `1.25` to leverage the latest language features and performance improvements.
+
+### Deprecated
+### Removed
+### Fixed
+### Security
+
+---
 ## [0.6.0] - 2025-07-03
 
 ### Added
@@ -116,7 +128,8 @@ Date format: `YYYY-MM-DD`
 ### Fixed
 ### Security
 
-[Unreleased]: https://github.com/sixafter/graph/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/sixafter/graph/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/sixafter/graph/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/sixafter/graph/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/sixafter/graph/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/sixafter/graph/compare/v0.4.0...v0.4.1

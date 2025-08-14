@@ -1,10 +1,15 @@
+// Copyright (c) 2024 Six After, Inc
+//
+// This source code is licensed under the Apache 2.0 License found in the
+// LICENSE file in the root directory of this source tree.
+
 module github.com/sixafter/graph
 
-go 1.24
+go 1.25
 
 require (
 	github.com/stretchr/testify v1.10.0
-	golang.org/x/exp v0.0.0-20250718183923-645b1fa84792
+	golang.org/x/exp v0.0.0-20250813145105-42675adae3e6
 )
 
 require (
