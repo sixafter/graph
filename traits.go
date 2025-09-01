@@ -1,4 +1,4 @@
-// Copyright (c) 2024 Six After, Inc
+// Copyright (c) 2024-2025 Six After, Inc
 //
 // This source code is licensed under the Apache 2.0 License found in the
 // LICENSE file in the root directory of this source tree.
@@ -25,7 +25,7 @@ type Traits struct {
 	// IsMultiGraph indicates whether the graph is a multigraph. A multigraph is a
 	// graph that allows multiple edges between the same pair of vertices.
 	IsMultiGraph bool
-	
+
 	// IsRooted indicates whether the graph is rooted. A rooted graph is a graph
 	// with a designated root node, common in tree structures.
 	IsRooted bool
