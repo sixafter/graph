@@ -51,7 +51,7 @@ jobs:
 
       # Ref: https://github.com/actions/setup-go
       - name: Install Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
 
@@ -83,9 +83,7 @@ jobs:
 
       # Ref: https://github.com/SonarSource/sonarqube-scan-action
       - name: Scan with SonarQube
-        uses: sonarsource/sonarqube-scan-action@v5
-        with:
-          projectBaseDir: ./
+        uses: sonarsource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_USER: ${{ github.actor }}
