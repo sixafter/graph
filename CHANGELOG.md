@@ -18,11 +18,28 @@ Date format: `YYYY-MM-DD`
 ### Security
 
 ---
+## [0.10.0] - 2025-11-07
+
+### Added
+### Changed
+- **debt:** Upgraded all dependencies to their latest stable versions.
+
+### Deprecated
+### Removed
+### Fixed
+### Security
+
+---
 ## [0.9.0] - 2025-10-14
 
 ### Added
 ### Changed
 - **debt:** Upgraded all dependencies to their latest stable versions.
+
+### Deprecated
+### Removed
+### Fixed
+### Security
 
 ---
 ## [0.8.0] - 2025-09-01
@@ -148,7 +165,8 @@ Date format: `YYYY-MM-DD`
 ### Fixed
 ### Security
 
-[Unreleased]: https://github.com/sixafter/graph/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/sixafter/graph/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/sixafter/graph/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/sixafter/graph/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/sixafter/graph/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/sixafter/graph/compare/v0.6.0...v0.7.0
