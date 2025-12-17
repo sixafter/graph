@@ -74,7 +74,7 @@ curl -LO "https://github.com/sixafter/graph/releases/download/${TAG}/graph-${VER
 # Verify the tarball with Cosign using the published public key
 cosign verify-blob \
   --key "https://raw.githubusercontent.com/sixafter/graph/main/cosign.pub" \
-  --bundle "aes-ctr-drbg-${VERSION}.tar.gz.sigstore.json" \
+  --bundle "graph-${VERSION}.tar.gz.sigstore.json" \
   "graph-${VERSION}.tar.gz"
 
 # ---------------------------------------------------------------------
