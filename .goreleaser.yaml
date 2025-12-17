@@ -36,6 +36,24 @@ changelog:
   # Default: 'git'.
   use: github
 
+  # Format to use for commit formatting.
+  #
+  # Templates: allowed.
+  #
+  # Default:
+  #    if 'git': '{{ .SHA }} {{ .Message }}'
+  #   otherwise: '{{ .SHA }}: {{ .Message }} ({{ with .AuthorUsername }}@{{ . }}{{ else }}{{ .AuthorName }} <{{ .AuthorEmail }}>{{ end }})'.
+  #
+  # Extra template fields:
+  # - `SHA`: the commit SHA1
+  # - `Message`: the first line of the commit message, otherwise known as commit subject
+  # - `AuthorName`: the author full name (considers mailmap if 'git')
+  # - `AuthorEmail`: the author email (considers mailmap if 'git')
+  # - `AuthorUsername`: github/gitlab/gitea username - not available if 'git'
+  #
+  # Usage with 'git': Since: v2.8.
+  format: "{{.SHA}}: {{.Message}} (@{{.AuthorUsername}})"
+
   # Max commit hash length to use in the changelog.
   #
   # 0: use whatever the changelog implementation gives you
@@ -83,10 +101,123 @@ changelog:
     - title: Others
       order: 999
 
-sboms:
-  - artifacts: archive
+# Ref: https://goreleaser.com/customization/checksums/
+checksum:
+  name_template: 'checksums.txt'
 
+# Ref: https://goreleaser.com/customization/sign/
+# Ref: https://goreleaser.com/blog/cosign-v3/
+signs:
+  - id: source
+    cmd: cosign
+    stdin: '{{ .Env.COSIGN_PASSWORD }}'
+    output: true
+    artifacts: source
+    signature: "${artifact}.sigstore.json"
+    args:
+      - sign-blob
+      - --yes
+      - --key
+      - env://COSIGN_PRIVATE_KEY
+      - "--bundle=${signature}"
+      - '${artifact}'
+
+  - id: checksums
+    cmd: cosign
+    stdin: '{{ .Env.COSIGN_PASSWORD }}'
+    output: true
+    artifacts: checksum
+    signature: "${artifact}.sigstore.json"
+    args:
+      - sign-blob
+      - --yes
+      - --key
+      - env://COSIGN_PRIVATE_KEY
+      - "--bundle=${signature}"
+      - '${artifact}'
+
+# Ref: https://goreleaser.com/customization/source/
+source:
+  # Whether this pipe is enabled or not.
+  enabled: true
+
+  # Name template of the final archive.
+  #
+  # Default: '{{ .ProjectName }}-{{ .Version }}'.
+  # Templates: allowed.
+  name_template: "{{ .ProjectName }}-{{ .Version }}"
+
+  # Format of the archive.
+  #
+  # Valid formats are: tar, tgz, tar.gz, and zip.
+  #
+  # Default: 'tar.gz'.
+  format: tar.gz
+
+  # Prefix.
+  # String to prepend to each filename in the archive.
+  #
+  # Templates: allowed.
+  prefix_template: "{{ .ProjectName }}-{{ .Version }}/"
+
+  # You can add additional files if needed, or omit for default behavior.
+  # files:
+  #   - LICENSE
+  #   - README.md
+  # files:
+  #   - LICENSE
+  #   - README.md
+  #   - CHANGELOG/CHANGELOG*
+  #   - go.mod
+  #   - go.sum
+  #   - "*.go"
+  #   - "x/**/*"
+  #   - "vendor/**/*"
+
+# Ref: https://goreleaser.com/customization/sbom/
+sboms:
+  - # ID of the sbom config, must be unique.
+    #
+    # Default: 'default'.
+    id: default
+
+    # Which artifacts to catalog.
+    #
+    # Valid options are:
+    # - any:        let the SBOM tool decide which artifacts available in
+    #               the cwd should be cataloged
+    # - source:     source archive
+    # - package:    Linux packages (deb, rpm, apk, etc)
+    # - installer:  Windows MSI installers (Pro only)
+    # - diskimage:  macOS DMG disk images (Pro only)
+    # - archive:    archives from archive pipe
+    # - binary:     binaries output from the build stage
+    #
+    # Default: 'archive'.
+    artifacts: source
+
+    # IDs of the artifacts to catalog.
+    #
+    # If `artifacts` is "source" or "any" then this fields has no effect.
+    # ids:
+    #   - src
+
+# Ref: https://goreleaser.com/customization/release/
 release:
+  # Repo in which the release will be created.
+  # Default: extracted from the origin remote URL or empty if its private hosted.
+  github:
+    owner: sixafter
+    name: graph
+
+  # You can change the name of the release.
+  #
+  # Default: '{{.Tag}}' ('{{.PrefixedTag}}' on Pro).
+  # Templates: allowed.
   name_template: 'v{{ .Version }}'
+
+  # Footer for the release body.
+  #
+  # Templates: allowed.
   footer: |
-    **Full Changelog**: [CHANGELOG](https://github.com/sixafter/graph/tree/main/CHANGELOG.md)
+    **Full Changelog**: [CHANGELOG](https://github.com/sixafter/graph/tree/main/CHANGELOG/CHANGELOG-1.x.md)

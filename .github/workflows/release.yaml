@@ -60,3 +60,6 @@ jobs:
           args: release --clean ${{ env.flags }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COSIGN_PASSWORD: '${{ secrets.GRAPH_COSIGN_PASSWORD }}'
+          COSIGN_PRIVATE_KEY: '${{ secrets.GRAPH_COSIGN_PRIVATE_KEY }}'
+          COSIGN_PUBLIC_KEY: '${{ secrets.GRAPH_COSIGN_PUBLIC_KEY }}'

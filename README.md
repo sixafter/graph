@@ -47,6 +47,70 @@ This Go-based graph library is designed for versatility, performance, and extens
   - Graph Serialization: Export and import graphs to/from various formats for interoperability. 
   - Customizable Readers and Writers: Create tailored I/O operations for graph persistence.
 
+
+---
+
+## Verify with Cosign
+
+[Cosign](https://github.com/sigstore/cosign) is used to sign releases for integrity verification.
+
+To verify the integrity of the release tarball, you can use Cosign to check the signature and checksums. Follow these steps:
+
+```sh
+# Fetch the latest release tag from GitHub API (e.g., "v0.12.0")
+TAG=$(curl -s https://api.github.com/repos/sixafter/graph/releases/latest | jq -r .tag_name)
+
+# Remove leading "v" for filenames (e.g., "v0.12.0" -> "0.12.0")
+VERSION=${TAG#v}
+
+# ---------------------------------------------------------------------
+# Verify the source archive using Sigstore bundles
+# ---------------------------------------------------------------------
+
+# Download the release tarball and its signature bundle
+curl -LO "https://github.com/sixafter/graph/releases/download/${TAG}/graph-${VERSION}.tar.gz"
+curl -LO "https://github.com/sixafter/graph/releases/download/${TAG}/graph-${VERSION}.tar.gz.sigstore.json"
+
+# Verify the tarball with Cosign using the published public key
+cosign verify-blob \
+  --key "https://raw.githubusercontent.com/sixafter/graph/main/cosign.pub" \
+  --bundle "aes-ctr-drbg-${VERSION}.tar.gz.sigstore.json" \
+  "graph-${VERSION}.tar.gz"
+
+# ---------------------------------------------------------------------
+# Verify the checksums manifest using Sigstore bundles
+# ---------------------------------------------------------------------
+
+curl -LO "https://github.com/sixafter/graph/releases/download/${TAG}/checksums.txt"
+curl -LO "https://github.com/sixafter/graph/releases/download/${TAG}/checksums.txt.sigstore.json"
+
+cosign verify-blob \
+  --key "https://raw.githubusercontent.com/sixafter/graph/main/cosign.pub" \
+  --bundle "checksums.txt.sigstore.json" \
+  "checksums.txt"
+
+# ---------------------------------------------------------------------
+# Confirm local artifact integrity
+# ---------------------------------------------------------------------
+
+shasum -a 256 -c checksums.txt
+
+```
+
+If valid, Cosign will output:
+
+```shell
+Verified OK
+```
+
+---
+
+## Verify Go module
+
+To validate that the Go module archive served by GitHub, go mod download, and the Go
+proxy are all consistent, run the `module-verify` target. This performs a full cross-check
+of the tag archive and module ZIPs to confirm they match byte-for-byte.
+
 ---
 
 ## Installation

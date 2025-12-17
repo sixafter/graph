@@ -18,6 +18,18 @@ Date format: `YYYY-MM-DD`
 ### Security
 
 ---
+## [0.12.0] - 2025-12-17
+
+### Added
+- **risk:** Added digital signature to release artifacts for integrity verification.
+
+### Changed
+### Deprecated
+### Removed
+### Fixed
+### Security
+
+---
 ## [0.11.0] - 2025-12-17
 
 ### Added
