@@ -9,7 +9,7 @@ go 1.25
 
 require (
 	github.com/stretchr/testify v1.11.1
-	golang.org/x/exp v0.0.0-20250819193227-8b4c13bb791b
+	golang.org/x/exp v0.0.0-20251209150349-8475f28825e9
 )
 
 require (

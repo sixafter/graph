@@ -18,6 +18,20 @@ Date format: `YYYY-MM-DD`
 ### Security
 
 ---
+## [0.11.0] - 2025-12-17
+
+### Added
+- **risk:** Added release and module verification make targets.
+
+### Changed
+- **debt:** Upgraded all dependencies to their latest stable versions.
+
+### Deprecated
+### Removed
+### Fixed
+### Security
+
+---
 ## [0.10.0] - 2025-11-07
 
 ### Added
@@ -165,7 +179,8 @@ Date format: `YYYY-MM-DD`
 ### Fixed
 ### Security
 
-[Unreleased]: https://github.com/sixafter/graph/compare/v0.10.0...HEAD
+[Unreleased]: https://github.com/sixafter/graph/compare/v0.11.0...HEAD
+[0.11.0]: https://github.com/sixafter/graph/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/sixafter/graph/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/sixafter/graph/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/sixafter/graph/compare/v0.7.0...v0.8.0

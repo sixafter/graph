@@ -30,3 +30,4 @@ go.work.sum
 dist/
 
 coverage.*
+tmp/

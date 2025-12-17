@@ -19,7 +19,7 @@ GO_WORK=$(GO_CMD) work
 GO_WORK_FILE := ./go.work
 
 .PHONY: all
-all: clean test
+all: deps vendor update vendor tidy clean test
 
 .PHONY: deps
 deps: ## Get the dependencies and vendor
@@ -60,6 +60,10 @@ vet: ## Vet the files
 lint: ## Lint the files
 	$(GO_LINT_CMD) --config .golangci.yaml --verbose ./...
 
+.PHONY: release-verify
+release-verify: ## Verify the release
+	@scripts/verify-release.sh
+
 .PHONY: tidy
 tidy: ## Tidy vendored dependencies
 	$(GO_MOD) tidy
@@ -79,6 +83,14 @@ update: ## Update Go dependencies
 .PHONY: vuln
 vuln: ## Check for vulnerabilities
 	govulncheck ./...
+
+.PHONY: module-verify
+module-verify: ## Verify Go module integrity
+	@TAG=$(TAG) scripts/verify-mod.sh
+
+.PHONY: signature-verify
+signature-verify: ## Verify latest release's digital signatures
+	@scripts/verify-sig.sh
 
 .PHONY: help
 help: ## Display this help screen
