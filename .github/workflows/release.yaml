@@ -52,6 +52,17 @@ jobs:
         if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
         run: echo "flags=--snapshot" >> $GITHUB_ENV
 
+      # Ref: https://github.com/sigstore/cosign-installer
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v4.0.0
+
+      # Ref: https://github.com/anchore/sbom-action
+      - name: Generate SBOM via Syft
+        uses: anchore/sbom-action@v0
+        with:
+          format: spdx-json
+          artifact-name: sbom.spdx.json
+
       # Ref: https://github.com/goreleaser/goreleaser-action
       - name: "Release"
         uses: goreleaser/goreleaser-action@v6
