@@ -19,7 +19,7 @@ GO_WORK=$(GO_CMD) work
 GO_WORK_FILE := ./go.work
 
 .PHONY: all
-all: deps vendor update vendor tidy clean test
+all: deps update tidy vendor clean test
 
 .PHONY: deps
 deps: ## Get the dependencies and vendor
