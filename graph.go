@@ -8,14 +8,13 @@
 package graph
 
 import (
+	"cmp"
 	"context"
-
-	"golang.org/x/exp/constraints"
 )
 
 type Ordered interface {
 	comparable // Ensures equality (`==`, `!=`) is supported.
-	constraints.Ordered
+	cmp.Ordered
 }
 
 // Interface represents a generic graph metadata structure consisting of vertices of
