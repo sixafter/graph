@@ -18,6 +18,19 @@ Date format: `YYYY-MM-DD`
 ### Security
 
 ---
+## [0.12.2] - 2026-07-12
+
+### Added
+### Changed
+### Deprecated
+- **debt:** Deprecated the use of `golang.org/x/exp/constraints`.
+
+### Removed
+### Fixed
+### Security
+- **debt:** Upgraded dependencies to their latest stable versions.
+
+---
 ## [0.12.1] - 2026-01-16
 
 ### Added
@@ -203,7 +216,8 @@ Date format: `YYYY-MM-DD`
 ### Fixed
 ### Security
 
-[Unreleased]: https://github.com/sixafter/graph/compare/v0.12.1...HEAD
+[Unreleased]: https://github.com/sixafter/graph/compare/v0.12.2...HEAD
+[0.12.2]: https://github.com/sixafter/graph/compare/v0.12.1...v0.12.2
 [0.12.1]: https://github.com/sixafter/graph/compare/v0.12.0...v0.12.1
 [0.12.0]: https://github.com/sixafter/graph/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/sixafter/graph/compare/v0.10.0...v0.11.0
