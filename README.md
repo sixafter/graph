@@ -2,7 +2,6 @@
 
 A Go library for creating and manipulating graph data structures.
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/sixafter/graph)](https://goreportcard.com/report/github.com/sixafter/graph)
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue?style=flat-square)](LICENSE)
 [![Go](https://img.shields.io/github/go-mod/go-version/sixafter/graph)](https://img.shields.io/github/go-mod/go-version/sixafter/graph)
 [![Go Reference](https://pkg.go.dev/badge/github.com/sixafter/graph.svg)](https://pkg.go.dev/github.com/sixafter/graph)
