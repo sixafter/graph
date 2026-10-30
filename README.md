@@ -2,9 +2,12 @@
 
 A Go library for creating and manipulating graph data structures.
 
+Please see the [godoc](https://pkg.go.dev/github.com/sixafter/graph) for detailed documentation. The documentation is also indexed on [Context7](https://context7.com/sixafter/graph) for use with AI coding assistants. Use the library ID `/sixafter/graph` with the Context7 MCP server or any Context7-aware tool.
+
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue?style=flat-square)](LICENSE)
 [![Go](https://img.shields.io/github/go-mod/go-version/sixafter/graph)](https://img.shields.io/github/go-mod/go-version/sixafter/graph)
 [![Go Reference](https://pkg.go.dev/badge/github.com/sixafter/graph.svg)](https://pkg.go.dev/github.com/sixafter/graph)
+[![Context7](https://img.shields.io/badge/Context7-docs-blue?style=flat-square)](https://context7.com/sixafter/graph)
 
 ---
 
