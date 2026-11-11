@@ -59,10 +59,10 @@ This Go-based graph library is designed for versatility, performance, and extens
 To verify the integrity of the release tarball, you can use Cosign to check the signature and checksums. Follow these steps:
 
 ```sh
-# Fetch the latest release tag from GitHub API (e.g., "v0.13.0")
+# Fetch the latest release tag from GitHub API (e.g., "v0.14.0")
 TAG=$(curl -s https://api.github.com/repos/sixafter/graph/releases/latest | jq -r .tag_name)
 
-# Remove leading "v" for filenames (e.g., "v0.13.0" -> "0.13.0")
+# Remove leading "v" for filenames (e.g., "v0.14.0" -> "0.14.0")
 VERSION=${TAG#v}
 
 # ---------------------------------------------------------------------
